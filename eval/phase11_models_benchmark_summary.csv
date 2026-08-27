@@ -1,0 +1,7 @@
+Model,Op Output SNR (dB),Op SNR Std (dB),SNR Pass Rate (%),SNR Pass Rate CI Low (%),SNR Pass Rate CI High (%),Op STOI,Op PESQ,Stress Output SNR (dB),Stress SNR Gain (dB),CPU Latency (ms),CPU RTF
+"Baseline (811K, BatchNorm, K=1.0)",12.75,5.35,28.0,23.2,33.3,0.8990,3.69,4.59,+6.84,0.103,0.0064
+"Causal TCN Net (899K, Dilated TCN, K=1.0)",12.61,5.30,27.7,22.9,33.0,0.8946,3.67,5.13,+7.39,0.088,0.0055
+"Scaled Net (3.24M, BatchNorm, K=1.0)",12.21,4.79,25.3,20.7,30.5,0.8934,3.64,4.26,+6.51,0.169,0.0105
+"Polar Bounded (811K, K=1.5)",12.07,4.69,23.7,19.2,28.8,0.8933,3.64,4.72,+6.97,0.067,0.0042
+"Causal GroupNorm (811K, K=1.0)",11.91,5.03,24.0,19.5,29.1,0.8840,3.56,3.62,+5.87,0.079,0.0049
+"Phase 9 Polar (811K, K=3.0)",11.58,4.47,20.0,15.9,24.9,0.8864,3.58,4.18,+6.43,0.069,0.0043

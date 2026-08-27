@@ -518,3 +518,262 @@ def build_scaled_causal_anc_model(
     )
     return model
 
+
+class CausalTCNBlock(nn.Module):
+    """
+    Causal Dilated Depthwise-Separable Temporal Convolution Block.
+    Guarantees strict left-context-only causality via explicit left-padding:
+    Pad: ( (kernel_size - 1) * dilation, 0 ) along time.
+    Structure:
+      Left-padded Depthwise Conv1D (groups=C) -> Norm -> PReLU -> Pointwise Conv1D (1x1) -> Norm -> PReLU -> Residual
+    """
+    def __init__(
+        self,
+        channels: int = 128,
+        dilation: int = 1,
+        kernel_size: int = 3,
+        norm_type: str = "batch"
+    ):
+        super().__init__()
+        self.dilation = dilation
+        self.kernel_size = kernel_size
+        self.pad_len = (kernel_size - 1) * dilation
+
+        # Depthwise 1D conv along time axis
+        self.dw_conv = nn.Conv1d(
+            in_channels=channels,
+            out_channels=channels,
+            kernel_size=kernel_size,
+            dilation=dilation,
+            groups=channels,
+            bias=False
+        )
+        self.bn1 = nn.BatchNorm1d(channels) if norm_type == "batch" else nn.GroupNorm(4, channels)
+        self.act1 = nn.PReLU(channels)
+
+        # Pointwise 1D conv
+        self.pw_conv = nn.Conv1d(
+            in_channels=channels,
+            out_channels=channels,
+            kernel_size=1,
+            bias=False
+        )
+        self.bn2 = nn.BatchNorm1d(channels) if norm_type == "batch" else nn.GroupNorm(4, channels)
+        self.act2 = nn.PReLU(channels)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # x: (B, C, T)
+        residual = x
+        x_pad = F.pad(x, (self.pad_len, 0))
+        out = self.act1(self.bn1(self.dw_conv(x_pad)))
+        out = self.act2(self.bn2(self.pw_conv(out)))
+        return out + residual
+
+
+class CausalANCTCNNet(nn.Module):
+    """
+    Real-Time AI/ML Causal Complex ANC Model with Dilated Temporal Convolutional Network (TCN) Stack.
+    Pipeline: STFT -> Complex 2D Encoder -> Linear Proj -> Causal Dilated TCN Stack -> Causal GRU -> Linear Proj -> Complex 2D Decoder -> cRM Mask.
+    Expands the feedforward temporal receptive field across dilations [1, 2, 4, 8, 16] (~62 frames / 496 ms context)
+    before feeding into the recurrent memory core.
+    """
+
+    def __init__(
+        self,
+        n_fft: int = 512,
+        hop_length: int = 256,
+        win_length: int = 512,
+        hidden_dim: int = 128,
+        num_gru_layers: int = 2,
+        tcn_dilations: Tuple[int, ...] = (1, 2, 4, 8, 16),
+        norm_type: str = "batch",
+        mask_bound: float = 1.0,
+        mask_mode: str = "component_tanh"
+    ):
+        super().__init__()
+        self.n_fft = n_fft
+        self.hop_length = hop_length
+        self.win_length = win_length
+        self.n_freq = n_fft // 2 + 1  # 257
+        self.hidden_dim = hidden_dim
+        self.num_gru_layers = num_gru_layers
+        self.tcn_dilations = tcn_dilations
+        self.norm_type = norm_type
+        self.mask_bound = mask_bound
+        self.mask_mode = mask_mode
+
+        self.register_buffer("window", torch.hann_window(win_length))
+
+        def make_norm2d(channels):
+            if norm_type == "group":
+                return CausalFrameNorm(channels, norm_type="group", num_groups=4)
+            return nn.BatchNorm2d(channels)
+
+        # Encoder (2 -> 16 -> 32 -> 64)
+        self.enc_conv1 = CausalConv2d(2, 16, kernel_size=(3, 3), stride=(2, 1), padding=(1, 0))
+        self.enc_bn1 = make_norm2d(16)
+        self.enc_act1 = nn.LeakyReLU(0.1, inplace=True)
+
+        self.enc_conv2 = CausalConv2d(16, 32, kernel_size=(3, 3), stride=(2, 1), padding=(1, 0))
+        self.enc_bn2 = make_norm2d(32)
+        self.enc_act2 = nn.LeakyReLU(0.1, inplace=True)
+
+        self.enc_conv3 = CausalConv2d(32, 64, kernel_size=(3, 3), stride=(2, 1), padding=(1, 0))
+        self.enc_bn3 = make_norm2d(64)
+        self.enc_act3 = nn.LeakyReLU(0.1, inplace=True)
+
+        self.enc_freq_dim = 33
+        self.rnn_in_dim = 64 * self.enc_freq_dim  # 2112
+
+        # Linear Projection to hidden_dim
+        self.rnn_proj_in = nn.Linear(self.rnn_in_dim, hidden_dim)
+
+        # Causal Dilated TCN Stack (Temporal receptive field expansion)
+        tcn_blocks = []
+        for d in tcn_dilations:
+            tcn_blocks.append(CausalTCNBlock(channels=hidden_dim, dilation=d, kernel_size=3, norm_type=norm_type))
+        self.tcn_stack = nn.Sequential(*tcn_blocks)
+
+        # Causal GRU
+        self.gru = nn.GRU(
+            input_size=hidden_dim,
+            hidden_size=hidden_dim,
+            num_layers=num_gru_layers,
+            batch_first=True
+        )
+
+        # Linear Projection back to frequency feature maps
+        self.rnn_proj_out = nn.Linear(hidden_dim, self.rnn_in_dim)
+        self.rnn_act = nn.LeakyReLU(0.1, inplace=True)
+
+        # Decoder (Mirror with Skips)
+        self.dec_deconv3 = CausalConvTranspose2d(128, 32, kernel_size=(3, 3), stride=(2, 1), padding=(1, 0))
+        self.dec_bn3 = make_norm2d(32)
+        self.dec_act3 = nn.LeakyReLU(0.1, inplace=True)
+
+        self.dec_deconv2 = CausalConvTranspose2d(64, 16, kernel_size=(3, 3), stride=(2, 1), padding=(1, 0))
+        self.dec_bn2 = make_norm2d(16)
+        self.dec_act2 = nn.LeakyReLU(0.1, inplace=True)
+
+        self.dec_deconv1 = CausalConvTranspose2d(32, 2, kernel_size=(3, 3), stride=(2, 1), padding=(1, 0))
+        self.mask_act = nn.Tanh()
+
+    def stft_forward(self, waveform: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        spec = torch.stft(
+            waveform,
+            n_fft=self.n_fft,
+            hop_length=self.hop_length,
+            win_length=self.win_length,
+            window=self.window.to(waveform.device),
+            center=True,
+            return_complex=True
+        )
+        return spec.real, spec.imag, spec
+
+    def istft_forward(self, real: torch.Tensor, imag: torch.Tensor, original_len: int) -> torch.Tensor:
+        spec = torch.complex(real, imag)
+        wav = torch.istft(
+            spec,
+            n_fft=self.n_fft,
+            hop_length=self.hop_length,
+            win_length=self.win_length,
+            window=self.window.to(real.device),
+            center=True,
+            length=original_len
+        )
+        return wav
+
+    def forward_spec(
+        self,
+        noisy_real: torch.Tensor,
+        noisy_imag: torch.Tensor,
+        h_state: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, Optional[torch.Tensor]]:
+        B, F_dim, T = noisy_real.shape
+        x = torch.stack([noisy_real, noisy_imag], dim=1)
+
+        # 1. Encoder
+        e1 = self.enc_act1(self.enc_bn1(self.enc_conv1(x)))
+        e2 = self.enc_act2(self.enc_bn2(self.enc_conv2(e1)))
+        e3 = self.enc_act3(self.enc_bn3(self.enc_conv3(e2)))
+
+        # 2. Reshape & Projection
+        e3_flat = e3.permute(0, 3, 1, 2).contiguous().view(B, T, self.rnn_in_dim)
+        proj_in = self.rnn_proj_in(e3_flat)  # (B, T, H)
+
+        # 3. Causal Dilated TCN Stack
+        # Permute to (B, H, T) for 1D Temporal Convolutions
+        tcn_in = proj_in.permute(0, 2, 1).contiguous()
+        tcn_out = self.tcn_stack(tcn_in)  # (B, H, T)
+        tcn_out_t = tcn_out.permute(0, 2, 1).contiguous()  # (B, T, H)
+
+        # 4. Causal GRU
+        rnn_out, next_h = self.gru(tcn_out_t, h_state)
+        rnn_out = self.rnn_act(self.rnn_proj_out(rnn_out))
+        d3_in = rnn_out.view(B, T, 64, self.enc_freq_dim).permute(0, 2, 3, 1).contiguous()
+
+        # 5. Decoder with Skip Connections
+        d3_cat = torch.cat([d3_in, e3], dim=1)
+        d3 = self.dec_act3(self.dec_bn3(self.dec_deconv3(d3_cat)))
+        if d3.shape[2] != e2.shape[2]:
+            d3 = d3[:, :, :e2.shape[2], :]
+
+        d2_cat = torch.cat([d3, e2], dim=1)
+        d2 = self.dec_act2(self.dec_bn2(self.dec_deconv2(d2_cat)))
+        if d2.shape[2] != e1.shape[2]:
+            d2 = d2[:, :, :e1.shape[2], :]
+
+        d1_cat = torch.cat([d2, e1], dim=1)
+        mask = self.dec_deconv1(d1_cat)
+        if mask.shape[2] != F_dim:
+            mask = mask[:, :, :F_dim, :]
+
+        # 6. Bounded Mask
+        if self.mask_mode == "polar_tanh":
+            z_r = mask[:, 0, :, :]
+            z_i = mask[:, 1, :, :]
+            mag = torch.sqrt(z_r**2 + z_i**2 + 1e-12)
+            u_r = z_r / mag
+            u_i = z_i / mag
+            g = self.mask_bound * torch.tanh(mag / self.mask_bound)
+            mask_r = g * u_r
+            mask_i = g * u_i
+        else:
+            mask = self.mask_bound * self.mask_act(mask)
+            mask_r = mask[:, 0, :, :]
+            mask_i = mask[:, 1, :, :]
+
+        enh_r = noisy_real * mask_r - noisy_imag * mask_i
+        enh_i = noisy_real * mask_i + noisy_imag * mask_r
+
+        return enh_r, enh_i, mask_r, mask_i, next_h
+
+    def forward(
+        self,
+        noisy_wav: torch.Tensor,
+        h_state: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, Optional[torch.Tensor]]:
+        orig_len = noisy_wav.shape[-1]
+        n_real, n_imag, _ = self.stft_forward(noisy_wav)
+        enh_r, enh_i, mask_r, mask_i, next_h = self.forward_spec(n_real, n_imag, h_state=h_state)
+        enh_wav = self.istft_forward(enh_r, enh_i, original_len=orig_len)
+        return enh_wav, enh_r, enh_i, next_h
+
+
+def build_tcn_causal_anc_model(
+    hidden_dim: int = 128,
+    num_gru_layers: int = 2,
+    tcn_dilations: Tuple[int, ...] = (1, 2, 4, 8, 16)
+) -> CausalANCTCNNet:
+    """Factory helper to build Causal ANC model with Dilated TCN stack."""
+    model = CausalANCTCNNet(
+        n_fft=512,
+        hop_length=256,
+        win_length=512,
+        hidden_dim=hidden_dim,
+        num_gru_layers=num_gru_layers,
+        tcn_dilations=tcn_dilations
+    )
+    return model
+
+

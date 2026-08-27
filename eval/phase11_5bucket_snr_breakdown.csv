@@ -1,0 +1,6 @@
+SNR Bucket,"Baseline (811K, BatchNorm, K=1.0)","Causal TCN Net (899K, Dilated TCN, K=1.0)","Scaled Net (3.24M, BatchNorm, K=1.0)","Polar Bounded (811K, K=1.5)","Causal GroupNorm (811K, K=1.0)","Phase 9 Polar (811K, K=3.0)"
+"Stress [-10, -5) dB",2.80,3.66,2.52,3.19,1.95,2.64
+"Stress [-5, 0) dB",6.38,6.60,5.99,6.25,5.29,5.72
+"Operational [0, 5) dB",9.21,9.18,8.82,8.78,8.37,8.39
+"Operational [5, 10) dB",13.43,13.18,12.79,12.59,12.60,12.06
+"Operational [10, 15] dB",15.60,15.47,15.03,14.85,14.75,14.29
