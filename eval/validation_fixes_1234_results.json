@@ -1,0 +1,156 @@
+{
+  "fix1_hop": {
+    "actual_hop_samples": 256,
+    "actual_hop_ms": 16.0,
+    "label_was_correct": true,
+    "conclusion": "ERF table correctly labeled '@ 16ms hop'. No correction needed. User's premise of 8ms hop does not apply."
+  },
+  "fix2_periodicity": [
+    {
+      "name": "Synthetic Helicopter Rotor",
+      "f0_hz": 24.06015037593985,
+      "period_ms": 41.5625,
+      "t0_arithmetic_ms": 41.5625,
+      "period_frames": 2.59765625,
+      "peak_val": 0.8778521418571472,
+      "note": ""
+    },
+    {
+      "name": "Synthetic Armored Tank Engine",
+      "f0_hz": 48.78048780487805,
+      "period_ms": 20.5,
+      "t0_arithmetic_ms": 20.5,
+      "period_frames": 1.28125,
+      "peak_val": 0.6443952322006226,
+      "note": ""
+    },
+    {
+      "name": "Synthetic Fighter Jet Flyby",
+      "f0_hz": 571.4285714285714,
+      "period_ms": 1.75,
+      "t0_arithmetic_ms": 1.75,
+      "period_frames": 0.109375,
+      "peak_val": 0.10310839116573334,
+      "note": "[NOT TONAL - broadband, corr unreliable]"
+    },
+    {
+      "name": "Real Tactical Corpus (MAD/AudioSet Avg)",
+      "f0_hz": 723.5784667923646,
+      "period_ms": 8.59375,
+      "t0_arithmetic_ms": 1.3820201206829947,
+      "period_frames": 0.537109375,
+      "peak_val": 0.487275873968971,
+      "note": "CORRECTED: T0=1.382ms != measured 8.59ms",
+      "rerun_available": true
+    }
+  ],
+  "fix3_pesq": {
+    "Baseline C-CRN (811K)": {
+      "surrogate_pesq_mean": 3.6757267105590192,
+      "surrogate_pesq_std": 0.5084232811819167,
+      "n_surrogate": 150,
+      "reference_pesq_mean": NaN,
+      "reference_pesq_std": 0.0,
+      "n_reference": 0,
+      "has_reference": false
+    },
+    "Causal TCN Net (899K)": {
+      "surrogate_pesq_mean": 3.6479469739210444,
+      "surrogate_pesq_std": 0.5373585766996317,
+      "n_surrogate": 150,
+      "reference_pesq_mean": NaN,
+      "reference_pesq_std": 0.0,
+      "n_reference": 0,
+      "has_reference": false
+    }
+  },
+  "fix4_postfilter": {
+    "stft_istft_mse": 7.682727781395801e-16,
+    "stft_istft_passed": true,
+    "baseline_snr": 12.491018295288086,
+    "baseline_stoi": 0.897684156937725,
+    "best_config": {
+      "alpha": 0.85,
+      "oversubtraction": 1.0,
+      "mean_snr": 11.575319290161133,
+      "mean_stoi": 0.8926864619751317
+    },
+    "best_snr": 11.575319290161133,
+    "best_delta": -0.9156990051269531,
+    "verdict": "NEGATIVE - degrades performance",
+    "sweep_results": [
+      {
+        "alpha": 0.85,
+        "oversubtraction": 1.0,
+        "mean_snr": 11.575319290161133,
+        "mean_stoi": 0.8926864619751317,
+        "delta_snr": -0.9156990051269531,
+        "n": 150
+      },
+      {
+        "alpha": 0.85,
+        "oversubtraction": 1.5,
+        "mean_snr": 11.189351081848145,
+        "mean_stoi": 0.8888863384207514,
+        "delta_snr": -1.3016672134399414,
+        "n": 150
+      },
+      {
+        "alpha": 0.85,
+        "oversubtraction": 2.0,
+        "mean_snr": 10.871118545532227,
+        "mean_stoi": 0.884623392415477,
+        "delta_snr": -1.6198997497558594,
+        "n": 150
+      },
+      {
+        "alpha": 0.9,
+        "oversubtraction": 1.0,
+        "mean_snr": 11.504602432250977,
+        "mean_stoi": 0.891371606189339,
+        "delta_snr": -0.9864158630371094,
+        "n": 150
+      },
+      {
+        "alpha": 0.9,
+        "oversubtraction": 1.5,
+        "mean_snr": 11.075616836547852,
+        "mean_stoi": 0.8864674051148747,
+        "delta_snr": -1.4154014587402344,
+        "n": 150
+      },
+      {
+        "alpha": 0.9,
+        "oversubtraction": 2.0,
+        "mean_snr": 10.716753005981445,
+        "mean_stoi": 0.8810172927106786,
+        "delta_snr": -1.7742652893066406,
+        "n": 150
+      },
+      {
+        "alpha": 0.95,
+        "oversubtraction": 1.0,
+        "mean_snr": 11.330535888671875,
+        "mean_stoi": 0.8877301303394408,
+        "delta_snr": -1.160482406616211,
+        "n": 150
+      },
+      {
+        "alpha": 0.95,
+        "oversubtraction": 1.5,
+        "mean_snr": 10.808317184448242,
+        "mean_stoi": 0.8802888320909513,
+        "delta_snr": -1.6827011108398438,
+        "n": 150
+      },
+      {
+        "alpha": 0.95,
+        "oversubtraction": 2.0,
+        "mean_snr": 10.365918159484863,
+        "mean_stoi": 0.87233412641664,
+        "delta_snr": -2.1251001358032227,
+        "n": 150
+      }
+    ]
+  }
+}
