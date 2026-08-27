@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Large Raw Audio Datasets
+data/
+datasets/
+*.wav
+*.flac
+*.mp3
+
+# Intermediate epoch checkpoints (keep best models and evaluation CSVs)
+checkpoints/**/epoch_*.pt
+checkpoints/**/latest_model.pt

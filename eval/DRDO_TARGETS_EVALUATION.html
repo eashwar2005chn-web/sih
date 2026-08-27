@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>DRDO PS 26052 Evaluation Report</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #e2e8f0; padding: 30px; }
+        h1, h2, h3 { color: #00f0ff; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; background: #1e293b; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #334155; }
+        th { background: #0284c7; color: white; }
+        tr:hover { background: #334155; }
+        .badge-pass { background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+        .badge-fail { background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+        .card { background: #1e293b; padding: 20px; border-radius: 8px; border-left: 4px solid #00f0ff; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🛡️ DRDO PS 26052: Tactical AI-ANC Evaluation Report</h1>
+    <div class="card">
+        <h3>Headline System Compliance Summary (Operational Range: 0 dB to +15 dB SNR)</h3>
+        <p><strong>Output SNR:</strong> 6.96 dB (Target > 15.0 dB) <span class="badge-fail">FAIL</span></p>
+        <p><strong>STOI Intelligibility:</strong> 0.843 (Target > 0.850) <span class="badge-fail">FAIL</span></p>
+        <p><strong>PESQ Speech Quality:</strong> 3.04 (Target > 2.50) <span class="badge-pass">PASSED</span></p>
+        <p><strong>Real-Time Factor:</strong> 0.0330 (Frame latency &lt; 1.0 ms) <span class="badge-pass">PASSED</span></p>
+    </div>
+    <h2>1. Operational Range Breakdown (0 dB to +15 dB SNR)</h2>
+    <table>
+        <tr><th>Scenario</th><th>Input SNR</th><th>Output SNR</th><th>Gain</th><th>STOI</th><th>PESQ (approx.)</th><th>RTF</th><th>Status</th></tr>
+
+    </table>
+    <h2>2. Degraded Channel Stress Test (-10 dB to -1 dB SNR)</h2>
+    <table>
+        <tr><th>Scenario</th><th>Input SNR</th><th>Output SNR</th><th>Gain</th><th>STOI</th><th>PESQ (approx.)</th><th>RTF</th><th>Graceful Status</th></tr>
+
+    </table>
+</body>
+</html>
