@@ -1,0 +1,45 @@
+[Phase17] threads=24 device=cpu
+[Phase17] 40 ep x 12000 samples = 30,000 optimizer steps (prior runs: 3,750)
+[Phase17] warmup=500 peak_lr=0.0005 -> 1e-05
+[Metric Engine] Active PESQ backend: Psychoacoustic Bark-distortion fallback (MSVC build tools not detected)
+[Phase17] Epoch [01/40] (320s, lr=5.00e-04) | Train 4.8238 | Val SNR +6.35dB | STOI 0.8321 | Score 14.67 | skipped 0 >>> [BEST]
+[Phase17] Epoch [02/40] (299s, lr=4.99e-04) | Train 2.5765 | Val SNR +10.14dB | STOI 0.8568 | Score 18.71 | skipped 0 >>> [BEST]
+[Phase17] Epoch [03/40] (293s, lr=4.96e-04) | Train 1.6897 | Val SNR +11.42dB | STOI 0.8668 | Score 20.09 | skipped 0 >>> [BEST]
+[Phase17] Epoch [04/40] (293s, lr=4.91e-04) | Train 1.3592 | Val SNR +11.98dB | STOI 0.8774 | Score 20.75 | skipped 1 >>> [BEST]
+[Phase17] Epoch [05/40] (292s, lr=4.85e-04) | Train 1.1516 | Val SNR +12.09dB | STOI 0.8822 | Score 20.91 | skipped 0 >>> [BEST]
+[Phase17] Epoch [06/40] (293s, lr=4.78e-04) | Train 1.0503 | Val SNR +12.42dB | STOI 0.8859 | Score 21.28 | skipped 0 >>> [BEST]
+[Phase17] Epoch [07/40] (293s, lr=4.69e-04) | Train 0.8989 | Val SNR +12.68dB | STOI 0.8860 | Score 21.54 | skipped 2 >>> [BEST]
+[Phase17] Epoch [08/40] (294s, lr=4.59e-04) | Train 0.8369 | Val SNR +12.84dB | STOI 0.8891 | Score 21.73 | skipped 0 >>> [BEST]
+[Phase17] Epoch [09/40] (297s, lr=4.48e-04) | Train 0.7386 | Val SNR +13.06dB | STOI 0.8917 | Score 21.97 | skipped 0 >>> [BEST]
+[Phase17] Epoch [10/40] (289s, lr=4.35e-04) | Train 0.7000 | Val SNR +12.99dB | STOI 0.8894 | Score 21.89 | skipped 0
+[Phase17] Epoch [11/40] (296s, lr=4.21e-04) | Train 0.6505 | Val SNR +13.11dB | STOI 0.8940 | Score 22.05 | skipped 1 >>> [BEST]
+[Phase17] Epoch [12/40] (292s, lr=4.06e-04) | Train 0.6125 | Val SNR +13.41dB | STOI 0.8930 | Score 22.34 | skipped 0 >>> [BEST]
+[Phase17] Epoch [13/40] (294s, lr=3.90e-04) | Train 0.5386 | Val SNR +13.42dB | STOI 0.8953 | Score 22.38 | skipped 0 >>> [BEST]
+[Phase17] Epoch [14/40] (290s, lr=3.74e-04) | Train 0.5427 | Val SNR +13.43dB | STOI 0.8997 | Score 22.43 | skipped 0 >>> [BEST]
+[Phase17] Epoch [15/40] (290s, lr=3.56e-04) | Train 0.4734 | Val SNR +13.61dB | STOI 0.8987 | Score 22.59 | skipped 2 >>> [BEST]
+[Phase17] Epoch [16/40] (291s, lr=3.38e-04) | Train 0.4231 | Val SNR +13.64dB | STOI 0.8985 | Score 22.63 | skipped 0 >>> [BEST]
+[Phase17] Epoch [17/40] (293s, lr=3.19e-04) | Train 0.4231 | Val SNR +13.70dB | STOI 0.8998 | Score 22.70 | skipped 0 >>> [BEST]
+[Phase17] Epoch [18/40] (289s, lr=3.00e-04) | Train 0.4030 | Val SNR +13.85dB | STOI 0.9022 | Score 22.87 | skipped 0 >>> [BEST]
+[Phase17] Epoch [19/40] (289s, lr=2.81e-04) | Train 0.3508 | Val SNR +13.79dB | STOI 0.9022 | Score 22.81 | skipped 1
+[Phase17] Epoch [20/40] (290s, lr=2.62e-04) | Train 0.3686 | Val SNR +13.90dB | STOI 0.9023 | Score 22.92 | skipped 0 >>> [BEST]
+[Phase17] Epoch [21/40] (292s, lr=2.42e-04) | Train 0.3287 | Val SNR +13.91dB | STOI 0.9022 | Score 22.93 | skipped 0 >>> [BEST]
+[Phase17] Epoch [22/40] (294s, lr=2.23e-04) | Train 0.3084 | Val SNR +13.98dB | STOI 0.9029 | Score 23.01 | skipped 1 >>> [BEST]
+[Phase17] Epoch [23/40] (307s, lr=2.03e-04) | Train 0.3003 | Val SNR +14.00dB | STOI 0.9035 | Score 23.04 | skipped 0 >>> [BEST]
+[Phase17] Epoch [24/40] (295s, lr=1.84e-04) | Train 0.2534 | Val SNR +14.00dB | STOI 0.9032 | Score 23.03 | skipped 0
+[Phase17] Epoch [25/40] (295s, lr=1.66e-04) | Train 0.1996 | Val SNR +14.07dB | STOI 0.9045 | Score 23.12 | skipped 0 >>> [BEST]
+[Phase17] Epoch [26/40] (292s, lr=1.48e-04) | Train 0.2151 | Val SNR +14.15dB | STOI 0.9046 | Score 23.19 | skipped 0 >>> [BEST]
+[Phase17] Epoch [27/40] (290s, lr=1.31e-04) | Train 0.2204 | Val SNR +14.13dB | STOI 0.9052 | Score 23.18 | skipped 0
+[Phase17] Epoch [28/40] (291s, lr=1.14e-04) | Train 0.1952 | Val SNR +14.20dB | STOI 0.9063 | Score 23.26 | skipped 0 >>> [BEST]
+[Phase17] Epoch [29/40] (291s, lr=9.87e-05) | Train 0.1817 | Val SNR +14.16dB | STOI 0.9056 | Score 23.22 | skipped 0
+[Phase17] Epoch [30/40] (290s, lr=8.41e-05) | Train 0.2013 | Val SNR +14.17dB | STOI 0.9059 | Score 23.23 | skipped 1
+[Phase17] Epoch [31/40] (290s, lr=7.06e-05) | Train 0.1720 | Val SNR +14.26dB | STOI 0.9055 | Score 23.31 | skipped 0 >>> [BEST]
+[Phase17] Epoch [32/40] (294s, lr=5.84e-05) | Train 0.1654 | Val SNR +14.27dB | STOI 0.9073 | Score 23.35 | skipped 0 >>> [BEST]
+[Phase17] Epoch [33/40] (291s, lr=4.73e-05) | Train 0.1383 | Val SNR +14.29dB | STOI 0.9067 | Score 23.36 | skipped 1 >>> [BEST]
+[Phase17] Epoch [34/40] (291s, lr=3.76e-05) | Train 0.1119 | Val SNR +14.32dB | STOI 0.9073 | Score 23.39 | skipped 0 >>> [BEST]
+[Phase17] Epoch [35/40] (291s, lr=2.93e-05) | Train 0.1350 | Val SNR +14.33dB | STOI 0.9069 | Score 23.39 | skipped 1 >>> [BEST]
+[Phase17] Epoch [36/40] (291s, lr=2.24e-05) | Train 0.1075 | Val SNR +14.32dB | STOI 0.9075 | Score 23.39 | skipped 0
+[Phase17] Epoch [37/40] (291s, lr=1.70e-05) | Train 0.0910 | Val SNR +14.34dB | STOI 0.9071 | Score 23.41 | skipped 0 >>> [BEST]
+[Phase17] Epoch [38/40] (290s, lr=1.31e-05) | Train 0.1431 | Val SNR +14.34dB | STOI 0.9074 | Score 23.42 | skipped 2 >>> [BEST]
+[Phase17] Epoch [39/40] (290s, lr=1.08e-05) | Train 0.1218 | Val SNR +14.34dB | STOI 0.9074 | Score 23.41 | skipped 1
+[Phase17] Epoch [40/40] (290s, lr=1.00e-05) | Train 0.0964 | Val SNR +14.35dB | STOI 0.9077 | Score 23.42 | skipped 0 >>> [BEST]
+[Phase17] done. best val op_score=23.42 -> checkpoints/phase17_long_train/best_model.pt

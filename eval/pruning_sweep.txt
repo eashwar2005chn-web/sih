@@ -1,0 +1,34 @@
+====================================================================================================
+PRUNING SWEEP  -  global unstructured L1 magnitude pruning (PS item D3)
+====================================================================================================
+  checkpoint : checkpoints/phase22_LONG150K/best_model.pt
+  scope      : conv + linear weights = 610,656 of 811,522 params (75.2%); GRU excluded (see prunable())
+  split      : VALIDATION, N=120   (test set untouched)
+  NOTE: unstructured pruning zeroes weights but keeps DENSE storage. The dense size
+        column is what a standard runtime loads; sparse-aware is the best case with
+        a sparse kernel. No fine-tuning is applied after pruning.
+
+   sparsity  actual   SNR dB     sd    STOI   pass%  dense MB  sparse MB  ms/frame
+  ----------------------------------------------------------------------------------------
+         0%    0.0%    15.97   6.17  0.9413   47.5%      3.25       5.69     0.138
+        20%   20.0%    15.54   5.02  0.9404   47.5%      3.25       4.71     0.120
+        30%   30.0%    14.41   4.16  0.9384   40.0%      3.25       4.22     0.131
+        50%   50.0%    15.14   5.46  0.9337   43.3%      3.25       3.25     0.136
+        70%   70.0%    13.40   4.60  0.9117   30.8%      3.25       2.27     0.122
+        90%   90.0%     9.62   3.73  0.8750   10.8%      3.25       1.29     0.125
+
+====================================================================================================
+  Accuracy cost relative to the unpruned model:
+     20% sparsity :  -0.44 dB   STOI -0.0009   pass  +0.0 pp   sparse-size  17.2% smaller
+     30% sparsity :  -1.57 dB   STOI -0.0029   pass  -7.5 pp   sparse-size  25.8% smaller
+     50% sparsity :  -0.83 dB   STOI -0.0076   pass  -4.2 pp   sparse-size  42.9% smaller
+     70% sparsity :  -2.57 dB   STOI -0.0296   pass -16.7 pp   sparse-size  60.1% smaller
+     90% sparsity :  -6.35 dB   STOI -0.0663   pass -36.7 pp   sparse-size  77.3% smaller
+
+  CAUTION on reading this table: N=120 and the per-utterance
+  spread is sd~6 dB, so the standard error on each SNR cell is ~0.6 dB. ADJACENT
+  sparsity levels are NOT separable, and the sweep is non-monotonic for that reason
+  (BatchNorm running statistics are frozen while pruning shifts activation scales,
+  which makes the degradation erratic rather than smooth). The reliable reading is
+  the TREND across the full range, not the ranking of neighbouring rows.
+====================================================================================================

@@ -1,0 +1,206 @@
+{
+  "Baseline 811K": {
+    "Operational (0-15 dB)": {
+      "ALL (as reported)": {
+        "n": 295,
+        "snr": 12.455,
+        "snr_ci": [
+          11.899,
+          13.012
+        ],
+        "pass_pct": 26.78,
+        "pass_ci": [
+          22.05,
+          32.11
+        ],
+        "stoi": 0.8973
+      },
+      "LEAKED": {
+        "n": 94,
+        "snr": 12.561,
+        "snr_ci": [
+          11.485,
+          13.637
+        ],
+        "pass_pct": 29.79,
+        "pass_ci": [
+          21.48,
+          39.68
+        ],
+        "stoi": 0.88
+      },
+      "CLEAN (no dupes)": {
+        "n": 201,
+        "snr": 12.406,
+        "snr_ci": [
+          11.762,
+          13.051
+        ],
+        "pass_pct": 25.37,
+        "pass_ci": [
+          19.86,
+          31.81
+        ],
+        "stoi": 0.9054
+      },
+      "leaked_minus_clean_db": 0.154,
+      "leaked_minus_clean_ci": [
+        -1.1,
+        1.409
+      ],
+      "significant": false
+    },
+    "Stress (-10-0 dB)": {
+      "ALL (as reported)": {
+        "n": 198,
+        "snr": 4.371,
+        "snr_ci": [
+          3.592,
+          5.15
+        ],
+        "pass_pct": 3.54,
+        "pass_ci": [
+          1.72,
+          7.12
+        ],
+        "stoi": 0.7284
+      },
+      "LEAKED": {
+        "n": 66,
+        "snr": 4.097,
+        "snr_ci": [
+          2.642,
+          5.552
+        ],
+        "pass_pct": 1.52,
+        "pass_ci": [
+          0.27,
+          8.1
+        ],
+        "stoi": 0.7222
+      },
+      "CLEAN (no dupes)": {
+        "n": 132,
+        "snr": 4.508,
+        "snr_ci": [
+          3.59,
+          5.425
+        ],
+        "pass_pct": 4.55,
+        "pass_ci": [
+          2.1,
+          9.56
+        ],
+        "stoi": 0.7315
+      },
+      "leaked_minus_clean_db": -0.411,
+      "leaked_minus_clean_ci": [
+        -2.131,
+        1.309
+      ],
+      "significant": false
+    }
+  },
+  "Causal TCN 899K": {
+    "Operational (0-15 dB)": {
+      "ALL (as reported)": {
+        "n": 295,
+        "snr": 12.33,
+        "snr_ci": [
+          11.776,
+          12.884
+        ],
+        "pass_pct": 26.44,
+        "pass_ci": [
+          21.73,
+          31.75
+        ],
+        "stoi": 0.8928
+      },
+      "LEAKED": {
+        "n": 94,
+        "snr": 12.365,
+        "snr_ci": [
+          11.33,
+          13.4
+        ],
+        "pass_pct": 27.66,
+        "pass_ci": [
+          19.63,
+          37.44
+        ],
+        "stoi": 0.8758
+      },
+      "CLEAN (no dupes)": {
+        "n": 201,
+        "snr": 12.314,
+        "snr_ci": [
+          11.658,
+          12.969
+        ],
+        "pass_pct": 25.87,
+        "pass_ci": [
+          20.31,
+          32.34
+        ],
+        "stoi": 0.9008
+      },
+      "leaked_minus_clean_db": 0.051,
+      "leaked_minus_clean_ci": [
+        -1.174,
+        1.276
+      ],
+      "significant": false
+    },
+    "Stress (-10-0 dB)": {
+      "ALL (as reported)": {
+        "n": 198,
+        "snr": 4.978,
+        "snr_ci": [
+          4.254,
+          5.702
+        ],
+        "pass_pct": 4.04,
+        "pass_ci": [
+          2.06,
+          7.77
+        ],
+        "stoi": 0.7326
+      },
+      "LEAKED": {
+        "n": 66,
+        "snr": 4.559,
+        "snr_ci": [
+          3.198,
+          5.92
+        ],
+        "pass_pct": 1.52,
+        "pass_ci": [
+          0.27,
+          8.1
+        ],
+        "stoi": 0.7243
+      },
+      "CLEAN (no dupes)": {
+        "n": 132,
+        "snr": 5.187,
+        "snr_ci": [
+          4.34,
+          6.035
+        ],
+        "pass_pct": 5.3,
+        "pass_ci": [
+          2.59,
+          10.54
+        ],
+        "stoi": 0.7368
+      },
+      "leaked_minus_clean_db": -0.628,
+      "leaked_minus_clean_ci": [
+        -2.231,
+        0.976
+      ],
+      "significant": false
+    }
+  }
+}

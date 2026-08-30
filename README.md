@@ -11,7 +11,13 @@ A complete, production-grade, hackathon-winning prototype engineered for **DRDO 
 
 ## 🏗️ System Architecture
 
-Our solution combines a **Causal Complex-Domain Neural Network (C-CRN)** with a **Hybrid Adaptive Normalized Least Mean Squares (NLMS) Post-Filter** running across heterogeneous silicon.
+Our solution is a **Causal Complex-Domain Neural Network (C-CRN)** — a causal STFT encoder, a 2-layer causal GRU temporal core, and a causal decoder predicting a complex ratio mask — trained on the RTX 5060 and deployable across CPU/NPU targets via OpenVINO INT8 quantization.
+
+> **Two separate post-filters exist in this repo and must not be conflated:**
+> 1. A **causal minimum-statistics spectral-subtraction** post-filter (`scripts/validate_cleanup_fixes_1234.py`) — this is what Phase 11B evaluated, sweeping 9 configurations; all degraded Output SNR (best: -0.92 dB). Ruled out. See [eval/DRDO_TARGETS_EVALUATION.md §9.5](eval/DRDO_TARGETS_EVALUATION.md).
+> 2. An **adaptive NLMS filter** (`model/adaptive_lms.py`) — a different classical technique, wired only into the demo GUI. It has **never been quantitatively evaluated**; no metric in any project report was produced with it enabled. It is off by default in the demo.
+>
+> Neither is part of the recommended pipeline below.
 
 ```
                   ┌─────────────────────────────────────────────────────────┐
@@ -46,13 +52,7 @@ Our solution combines a **Causal Complex-Domain Neural Network (C-CRN)** with a 
                                                │
                                                ▼
                   ┌─────────────────────────────────────────────────────────┐
-                  │  Intel Core Ultra 9 CPU: Hybrid Adaptive NLMS Post-Filter
-                  │  (Nulls residual 400Hz cockpit hum & blade pass tones)  │
-                  └────────────────────────────┬────────────────────────────┘
-                                               │
-                                               ▼
-                  ┌─────────────────────────────────────────────────────────┐
-                  │ ENHANCED TACTICAL AUDIO (SNR > 15dB | STOI > 0.85)      │
+                  │ ENHANCED TACTICAL AUDIO OUTPUT                          │
                   └─────────────────────────────────────────────────────────┘
 ```
 
@@ -62,21 +62,27 @@ Our solution combines a **Causal Complex-Domain Neural Network (C-CRN)** with a 
 
 | Hardware Engine | Role in Pipeline | Empirical Performance | Strategic Justification for DRDO |
 |---|---|---|---|
-| **NVIDIA GeForce RTX 5060 (CUDA)** | Model Training (AMP FP16), Batch Augmentation | **0.02 ms / frame** (RTF: 0.0011) | High-speed training convergence and rapid tactical fine-tuning |
-| **Intel AI Boost NPU (OpenVINO)** | Quantized INT8 Real-Time Inference | **0.18 ms / frame** (RTF: 0.0110, <2.5W) | **Direct stand-in for wearable edge tactical soldier SoC / DSP** |
-| **Intel Core Ultra 9 CPU** | Audio I/O, Causal STFT/iSTFT, NLMS Post-Filter | **0.10 ms / frame** (RTF: 0.0061) | Zero-jitter framing and adaptive residual filtering (<0.2ms) |
+| **NVIDIA GeForce RTX 5060 (CUDA)** | Model Training (AMP FP16) & High-Throughput Inference | **0.02 ms / frame** (RTF: 0.0011), re-measured 2026-08-30 after upgrading to torch 2.11.0+cu128 (sm_120 kernels) | Training acceleration; ~13x faster per training step than CPU |
+| **Intel AI Boost NPU (OpenVINO)** | ⚠️ **Attempted, not achieved** | **No measurement available** — the INT8 IR fails to compile on the NPU (`GRUSequence node has unsupported sequenceLengths input`). The GRU core is not currently supported by the Intel NPU compiler. | Honest limitation; edge story rests on the CPU INT8 numbers below, not on NPU |
+| **Intel Core Ultra 9 CPU** (PyTorch FP32) | Audio I/O, Causal STFT/iSTFT | **0.087 ms / frame** (RTF: 0.0054), re-measured 2026-08-27 | Zero-jitter causal framing |
+| **Intel Core Ultra 9 CPU** (OpenVINO INT8) | Quantized edge inference on host silicon | **0.093 ms / frame** (RTF: 0.0058), re-measured 2026-08-27 | Real INT8 deployment path (1.46 MB IR), verified reproducible |
 | **16GB DDR5 RAM** | On-the-Fly Streaming Data Pipeline | 0% RAM bloat | Eliminates memory leaks via dynamic parametric audio generation |
 
 ---
 
 ## 📊 Evaluation Results vs DRDO PS 26052 Targets
 
-| DRDO PS 26052 Metric | Required Target | Prototype Achieved Score | Compliance Verdict |
+Figures below are the baseline 811K-parameter model (`checkpoints/task4_full_run/best_model.pt`), measured on the held-out test split across the full 0-15 dB input-SNR operational range (N=300). Full methodology, per-bucket breakdown, and the diagnostic program behind the SNR gap: [eval/DRDO_TARGETS_EVALUATION.md](eval/DRDO_TARGETS_EVALUATION.md).
+
+| DRDO PS 26052 Metric | Required Target | Prototype Achieved (0-15 dB aggregate) | Compliance Verdict |
 |---|---|---|---|
-| **Signal-to-Noise Ratio (SNR)** | **> 15.0 dB** | **18.4 dB** (+16.8 dB improvement) | **PASSED (Target Exceeded) ✓** |
-| **Speech Intelligibility (STOI)** | **> 0.850** | **0.882** (Raw degraded: 0.620) | **PASSED (Target Exceeded) ✓** |
-| **Speech Quality (PESQ)** | **> 2.50** | **2.85** (Raw degraded: 1.45) | **PASSED (Target Exceeded) ✓** |
-| **Algorithmic Latency** | **< 16.0 ms** | **0.18 ms** (Frame hop = 16.0 ms) | **PASSED (Real-Time Validated) ✓** |
+| **Output SNR** | **> 15.0 dB** | **12.75 ± 5.35 dB**. Measured mean SNR improvement over the noisy input: **+4.00 dB** across the operational range, **+7.65 dB** across the -10 to 0 dB stress range (per-utterance `snr_gain`, N=295/198 excluding 7 degenerate test utterances — see [PHASE14](eval/PHASE14_TESTSET_CONTAMINATION.md)) | ⚠️ **SHORT on aggregate mean** — passes only in the easiest [10,15] dB input slice (15.60 dB); 28.0% per-utterance pass rate at the strict >15 dB threshold |
+| **Speech Intelligibility (STOI)** | **> 0.850** | **0.899** | **PASSED ✓** |
+| **Speech Quality (PESQ, internal proxy)** | **> 2.50** | **3.69** *(uncalibrated Bark-psychoacoustic surrogate — no MSVC build tools available for the ITU-T P.862 reference implementation; not literature-comparable, see caveat below)* | **PASSED ✓** *(on the proxy metric only)* |
+| **Algorithmic Latency (host CPU)** | **< 1.0 ms / frame** | **0.07-0.10 ms** | **PASSED ✓** (10-14× margin) |
+| **Algorithmic Lookahead** | **0.0 ms** | ⚠️ **~16 ms at the waveform level** — the network is strictly frame-causal (0.00e+00 future-*frame* leakage), but the STFT front-end uses centred analysis windows, so perturbing future *samples* changes output 319-470 samples (20-29 ms) earlier. See [PHASE15](eval/PHASE15_VERIFICATION_AUDIT.md) | ⚠️ **NOT MET as stated** |
+
+Five independent architectural hypotheses (data rebalancing, 4× capacity scaling, mask-bound widening, causal normalization, extended temporal receptive field) were tested via full-budget retrains to close the SNR gap; all five converge on the same ~12.6-12.8 dB ceiling, indicating this is a characterized property of single-channel causal STFT masking at this compute budget rather than an undertrained model. Full diagnostic trail in [eval/DRDO_TARGETS_EVALUATION.md](eval/DRDO_TARGETS_EVALUATION.md).
 
 ---
 
@@ -94,6 +100,7 @@ Our solution combines a **Causal Complex-Domain Neural Network (C-CRN)** with a 
 │   ├── app.py                       # Interactive Streamlit Tactical Cockpit GUI
 │   └── stream_engine.py             # Multi-backend audio streaming processor
 ├── docs/
+│   ├── COMPETITION_NARRATIVE.md     # Full presentation brief: methodology, honest gap framing, Q&A prep
 │   ├── JUDGE_PITCH_ONEPAGER.md      # One-page executive brief for DRDO evaluation panel
 │   └── DEMO_VIDEO_SCRIPT.md         # 90-second video demo storyboard & script
 ├── eval/
@@ -148,6 +155,6 @@ python export/quantize_openvino.py
 
 ## 🎖️ Key Highlights for DRDO Judges
 - **Phase Preservation**: Uses Complex Ratio Masking (cRM) to prevent speech distortion.
-- **Hybrid AI + Adaptive Filter**: Combines deep learning with CPU NLMS for residual acoustic feedback.
-- **Edge Deployable**: Quantized to 1.46 MB INT8 OpenVINO IR targeting wearable tactical soldier radios.
-- **Hardware-Aware Design**: Tailored to exploit Intel Core Ultra 9, RTX 5060, and Intel AI Boost NPU simultaneously.
+- **Frame-causal network, ~16 ms system lookahead**: the network has 0.00e+00 future-*frame* leakage (reproducible via `scripts/profile_tcn_latency_and_causality.py`), but the centred STFT front-end gives the end-to-end system ~16 ms of waveform-level lookahead (measured 20-29 ms including overlap-add span). The earlier "0.0 ms" claim measured frame causality only and has been corrected.
+- **Edge Deployable**: Quantized to 1.46 MB INT8 OpenVINO IR (verified on disk), running at 0.093 ms/frame on Intel Core Ultra 9 CPU via the OpenVINO runtime. NPU offload was attempted and does **not** currently work — see the hardware table above.
+- **Every number traceable**: all reported metrics trace to raw per-utterance CSVs in `eval/test_eval_csvs/` and are re-derivable; see [eval/PHASE13_CLAIM_AUDIT.md](eval/PHASE13_CLAIM_AUDIT.md).

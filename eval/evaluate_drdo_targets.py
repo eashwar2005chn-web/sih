@@ -26,6 +26,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from data.dataset_builder import TacticalAudioDataset
 from data.real_dataset_loader import HybridRealDataset
+from data.real_dataset_loader import verify_eval_splits_frozen
 from demo.stream_engine import RealTimeANCEngine
 from model.loss import compute_snr, compute_si_snr, compute_stoi, compute_pesq
 
@@ -74,7 +75,12 @@ def run_evaluation_subset(
             noisy,
             backend="CUDA" if engine.cuda_available else "CPU",
             enable_neural=True,
-            enable_nlms_post=True
+            # NLMS post-filter DISABLED. Phase 11B swept 9 configurations of the causal
+            # minimum-statistics post-filter and ALL of them degraded Output SNR (best: -0.92 dB);
+            # it is a confirmed dead end and is off everywhere else in the project. Leaving it
+            # True here silently applied a filter to any figure this script produced, which would
+            # not match the published numbers. See eval/DRDO_TARGETS_EVALUATION.md sec 9.5.
+            enable_nlms_post=False
         )
         enh = res["enhanced"]
         rtf = res["rtf"]
@@ -285,7 +291,7 @@ def evaluate_drdo_targets(
 
 > **Evaluation Methodology Notice:**
 > - **Speech Intelligibility (STOI)**: Evaluated using standard `pystoi` reference implementation.
-> - **Speech Quality (PESQ)**: Perceptual evaluation using calibrated psychoacoustic wideband model (`PESQ (approx.)`) until MSVC C-extension is installed.
+> - **Speech Quality (PESQ)**: Uncalibrated heuristic psychoacoustic wideband proxy (`PESQ (approx.)`, not regressed against real ITU-T P.862 scores) until MSVC C-extension is installed.
 > - **Channel Normalization**: Bandpass transceiver matching (300–3400 Hz) applied consistently to clean and degraded reference frames.
 > - **Checkpoint Provenance**: `{checkpoint_path}` (Size: {os.path.getsize(checkpoint_path) if os.path.exists(checkpoint_path) else 0:,} bytes)
 
@@ -394,6 +400,9 @@ def evaluate_drdo_targets(
 
 
 def main():
+    # Guard: every published metric was measured on the frozen val/test file lists.
+    # Raises if they have drifted (e.g. a new data source leaked into an eval split).
+    verify_eval_splits_frozen()
     parser = argparse.ArgumentParser(description="Evaluate Trained Model against Official DRDO PS 26052 Targets")
     parser.add_argument("--checkpoint", "--model_path", dest="checkpoint", type=str, default="checkpoints/task4_full_run/best_model.pt", help="Path to trained PyTorch checkpoint (.pt)")
     parser.add_argument("--samples", type=int, default=40, help="Number of test samples per regime (Operational / Stress)")

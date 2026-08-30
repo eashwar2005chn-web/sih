@@ -1,0 +1,42 @@
+[Phase20] device=cuda (fp32)  lambda_mask=6.27
+[Phase20] 30 ep x 16000 samples = 30,000 steps   CONTROL = Phase 17 @ 14.35 dB
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\scripts\run_phase20_mask_supervision.py:119: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\pytorch\torch\csrc\autograd\generated\python_variable_methods.cpp:837.)
+  tot += loss.item(); tot_m += float(l_mask); nb += 1; gstep += 1
+[Metric Engine] Active PESQ backend: Psychoacoustic Bark-distortion fallback (MSVC build tools not detected)
+[Phase20] Epoch [01/30] (62s, lr=5.00e-04) | Train 8.3806 | Mask 0.6943 | Val SNR +9.13dB | STOI 0.8299 | Score 17.43 | skip 0 >>> [BEST]
+[Phase20] Epoch [02/30] (28s, lr=4.97e-04) | Train 4.4255 | Mask 0.3724 | Val SNR +9.41dB | STOI 0.8427 | Score 17.84 | skip 0 >>> [BEST]
+[Phase20] Epoch [03/30] (28s, lr=4.91e-04) | Train 3.7504 | Mask 0.3284 | Val SNR +10.57dB | STOI 0.8335 | Score 18.90 | skip 0 >>> [BEST]
+[Phase20] Epoch [04/30] (28s, lr=4.83e-04) | Train 3.4399 | Mask 0.3117 | Val SNR +11.07dB | STOI 0.8608 | Score 19.68 | skip 0 >>> [BEST]
+[Phase20] Epoch [05/30] (27s, lr=4.72e-04) | Train 3.1679 | Mask 0.2987 | Val SNR +11.06dB | STOI 0.8606 | Score 19.66 | skip 0
+[Phase20] Epoch [06/30] (27s, lr=4.59e-04) | Train 3.0599 | Mask 0.2928 | Val SNR +11.35dB | STOI 0.8665 | Score 20.02 | skip 0 >>> [BEST]
+[Phase20] Epoch [07/30] (27s, lr=4.44e-04) | Train 3.0035 | Mask 0.2875 | Val SNR +11.17dB | STOI 0.8548 | Score 19.72 | skip 0
+[Phase20] Epoch [08/30] (27s, lr=4.26e-04) | Train 2.8914 | Mask 0.2819 | Val SNR +11.81dB | STOI 0.8672 | Score 20.48 | skip 0 >>> [BEST]
+[Phase20] Epoch [09/30] (27s, lr=4.06e-04) | Train 2.7924 | Mask 0.2772 | Val SNR +11.91dB | STOI 0.8747 | Score 20.66 | skip 0 >>> [BEST]
+[Phase20] Epoch [10/30] (27s, lr=3.85e-04) | Train 2.7461 | Mask 0.2746 | Val SNR +11.89dB | STOI 0.8714 | Score 20.60 | skip 0
+[Phase20] Epoch [11/30] (27s, lr=3.62e-04) | Train 2.7571 | Mask 0.2720 | Val SNR +12.22dB | STOI 0.8803 | Score 21.02 | skip 0 >>> [BEST]
+[Phase20] Epoch [12/30] (27s, lr=3.38e-04) | Train 2.6275 | Mask 0.2693 | Val SNR +12.35dB | STOI 0.8786 | Score 21.14 | skip 0 >>> [BEST]
+[Phase20] Epoch [13/30] (27s, lr=3.13e-04) | Train 2.4060 | Mask 0.2604 | Val SNR +12.16dB | STOI 0.8817 | Score 20.98 | skip 0
+[Phase20] Epoch [14/30] (27s, lr=2.88e-04) | Train 2.5793 | Mask 0.2668 | Val SNR +12.45dB | STOI 0.8820 | Score 21.27 | skip 0 >>> [BEST]
+[Phase20] Epoch [15/30] (27s, lr=2.62e-04) | Train 2.4964 | Mask 0.2655 | Val SNR +12.28dB | STOI 0.8797 | Score 21.08 | skip 0
+[Phase20] Epoch [16/30] (27s, lr=2.35e-04) | Train 2.5302 | Mask 0.2635 | Val SNR +12.45dB | STOI 0.8811 | Score 21.26 | skip 0
+[Phase20] Epoch [17/30] (27s, lr=2.10e-04) | Train 2.3363 | Mask 0.2603 | Val SNR +12.56dB | STOI 0.8813 | Score 21.37 | skip 0 >>> [BEST]
+[Phase20] Epoch [18/30] (27s, lr=1.84e-04) | Train 2.3768 | Mask 0.2581 | Val SNR +12.59dB | STOI 0.8777 | Score 21.36 | skip 0
+[Phase20] Epoch [19/30] (27s, lr=1.60e-04) | Train 2.4120 | Mask 0.2603 | Val SNR +12.61dB | STOI 0.8821 | Score 21.43 | skip 0 >>> [BEST]
+[Phase20] Epoch [20/30] (27s, lr=1.36e-04) | Train 2.3017 | Mask 0.2595 | Val SNR +12.75dB | STOI 0.8875 | Score 21.63 | skip 0 >>> [BEST]
+[Phase20] Epoch [21/30] (27s, lr=1.14e-04) | Train 2.2487 | Mask 0.2571 | Val SNR +12.76dB | STOI 0.8842 | Score 21.60 | skip 0
+[Phase20] Epoch [22/30] (27s, lr=9.37e-05) | Train 2.1937 | Mask 0.2511 | Val SNR +12.96dB | STOI 0.8877 | Score 21.83 | skip 0 >>> [BEST]
+[Phase20] Epoch [23/30] (27s, lr=7.50e-05) | Train 2.3023 | Mask 0.2526 | Val SNR +13.03dB | STOI 0.8850 | Score 21.88 | skip 0 >>> [BEST]
+[Phase20] Epoch [24/30] (27s, lr=5.84e-05) | Train 2.2097 | Mask 0.2523 | Val SNR +12.96dB | STOI 0.8871 | Score 21.83 | skip 0
+[Phase20] Epoch [25/30] (27s, lr=4.39e-05) | Train 2.1789 | Mask 0.2550 | Val SNR +13.18dB | STOI 0.8909 | Score 22.09 | skip 0 >>> [BEST]
+[Phase20] Epoch [26/30] (27s, lr=3.19e-05) | Train 2.3293 | Mask 0.2542 | Val SNR +13.06dB | STOI 0.8900 | Score 21.96 | skip 0
+[Phase20] Epoch [27/30] (27s, lr=2.24e-05) | Train 2.2714 | Mask 0.2539 | Val SNR +13.18dB | STOI 0.8914 | Score 22.10 | skip 0 >>> [BEST]
+[Phase20] Epoch [28/30] (27s, lr=1.55e-05) | Train 2.0609 | Mask 0.2474 | Val SNR +13.27dB | STOI 0.8912 | Score 22.18 | skip 0 >>> [BEST]
+[Phase20] Epoch [29/30] (27s, lr=1.14e-05) | Train 2.2278 | Mask 0.2526 | Val SNR +13.24dB | STOI 0.8904 | Score 22.15 | skip 0
+[Phase20] Epoch [30/30] (27s, lr=1.00e-05) | Train 2.1873 | Mask 0.2519 | Val SNR +13.22dB | STOI 0.8897 | Score 22.11 | skip 0
+
+========================================================================================
+PHASE 20 RESULT  best val SNR +13.27 dB (ep 28), STOI 0.8912
+  vs CONTROL (Phase 17, identical recipe) 14.35 dB : -1.08 dB
+  -> DO NOT PROMOTE
+========================================================================================

@@ -1,0 +1,9 @@
+{
+  "LONG150K": {
+    "arm": "LONG150K",
+    "lambda_mask": 0.0,
+    "best_epoch": 73,
+    "best_val_snr": 14.9972,
+    "best_val_stoi": 0.9175
+  }
+}

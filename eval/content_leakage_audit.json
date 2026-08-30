@@ -1,0 +1,61 @@
+{
+  "clean_speech": {
+    "n_train": 2546,
+    "n_test": 342,
+    "shared_hashes": 103,
+    "test_files_leaked": 103,
+    "test_pool_leaked_pct": 30.12
+  },
+  "generic_noise": {
+    "n_train": 2286,
+    "n_test": 275,
+    "shared_hashes": 124,
+    "test_files_leaked": 124,
+    "test_pool_leaked_pct": 45.09
+  },
+  "tactical_noise": {
+    "n_train": 201,
+    "n_test": 34,
+    "shared_hashes": 0,
+    "test_files_leaked": 0,
+    "test_pool_leaked_pct": 0.0
+  },
+  "rirs": {
+    "n_train": 105,
+    "n_test": 14,
+    "shared_hashes": 1,
+    "test_files_leaked": 1,
+    "test_pool_leaked_pct": 7.14
+  },
+  "evaluated_test_set": {
+    "n": 500,
+    "synthetic_speech_items": 81,
+    "synthetic_noise_items": 193,
+    "items_speech_content_leaked": 120,
+    "items_noise_content_leaked": 50,
+    "items_either_leaked": 164,
+    "items_either_leaked_pct": 32.8,
+    "per_bucket": {
+      "Stress [-10, -5) dB": {
+        "n": 100,
+        "leak": 36
+      },
+      "Stress [-5, 0) dB": {
+        "n": 100,
+        "leak": 32
+      },
+      "Operational [0, 5) dB": {
+        "n": 100,
+        "leak": 35
+      },
+      "Operational [5, 10) dB": {
+        "n": 100,
+        "leak": 31
+      },
+      "Operational [10, 15] dB": {
+        "n": 100,
+        "leak": 30
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+============================================================================================
+ORACLE VAD / SPEECH-GATING PROBE  —  ceiling on explicit voice detection
+============================================================================================
+  model      : checkpoints/phase22_LONG150K/best_model.pt (epoch 73, val_snr 15.00)
+  split      : VALIDATION   VAD threshold: peak -40 dB per frame
+  detector   : ORACLE (derived from the clean reference) -> upper bound
+
+  Stress [-10,-5)     base  +6.19  A_hard  +6.23  B_soft  +6.23  C_binTF  +8.82
+  Stress [-5,0)       base  +9.28  A_hard  +9.38  B_soft  +9.38  C_binTF +14.02
+  Op [0,5)            base +14.32  A_hard +14.54  B_soft +14.53  C_binTF +19.35
+  Op [5,10)           base +16.00  A_hard +16.01  B_soft +16.01  C_binTF +19.81
+  Op [10,15]          base +17.60  A_hard +17.60  B_soft +17.60  C_binTF +18.85
+
+============================================================================================
+AGGREGATE (val, N=200)
+============================================================================================
+  BASE   model output, unmodified             +12.68 dB   (+0.00 vs base)
+  A      oracle HARD frame gate               +12.75 dB   (+0.07 vs base)
+  B      oracle SOFT frame gate (-20 dB)      +12.75 dB   (+0.07 vs base)
+  C      oracle BINARY per-bin TF mask        +16.17 dB   (+3.49 vs base)
+
+  frames the oracle calls speech-absent      : 16.2%
+  model output energy sitting in those frames: 0.183%
+============================================================================================

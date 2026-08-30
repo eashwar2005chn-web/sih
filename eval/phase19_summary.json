@@ -1,0 +1,22 @@
+{
+  "C2-A_snr_loss": {
+    "arm": "C2-A_snr_loss",
+    "cfg": {
+      "lambda_snr": 1.0,
+      "hard_weight": 1.0
+    },
+    "best_epoch": 29,
+    "best_val_snr": 13.3978,
+    "best_val_stoi": 0.8928
+  },
+  "C2-B_snr_plus_weighted": {
+    "arm": "C2-B_snr_plus_weighted",
+    "cfg": {
+      "lambda_snr": 1.0,
+      "hard_weight": 3.0
+    },
+    "best_epoch": 28,
+    "best_val_snr": 13.3056,
+    "best_val_stoi": 0.8922
+  }
+}

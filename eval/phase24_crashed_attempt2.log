@@ -1,0 +1,86 @@
+============================================================================================
+PHASE 24 - 100 h SPEAKER-DISJOINT RETRAIN
+============================================================================================
+[P24] REGIME speaker_disjoint=True  excluded=['gunshot_kaggle', 'librispeech', 'voicebank_clean']
+[P24] clean-speech sources: ['librispeech', 'librispeech_train100', 'voicebank_clean']
+[P24] train clean-speech files: 28,539  (control used 2,546)
+[P24] frozen eval manifest: VERIFIED - val/test unchanged
+[P24] device=cuda fp32 workers=8  params=811,522
+[P24] 75 ep x 32000 = 150,000 steps
+[P24] CONTROL = P22-LONG @ 15.00 dB val (identical recipe, 5.04 h)
+============================================================================================
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\data\real_dataset_loader.py:527: RuntimeWarning: mix_speech_and_noise: noise segment is all-zero; target_snr_db=9.03 CANNOT be achieved and the returned mixture will equal the clean signal. This sample is degenerate and should be excluded or resampled.
+  noisy, clean, _ = mix_speech_and_noise(clean, noise, target_snr_db=snr_db)
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\data\real_dataset_loader.py:527: RuntimeWarning: mix_speech_and_noise: noise segment is all-zero; target_snr_db=-3.95 CANNOT be achieved and the returned mixture will equal the clean signal. This sample is degenerate and should be excluded or resampled.
+  noisy, clean, _ = mix_speech_and_noise(clean, noise, target_snr_db=snr_db)
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\data\real_dataset_loader.py:527: RuntimeWarning: mix_speech_and_noise: noise segment is all-zero; target_snr_db=-4.51 CANNOT be achieved and the returned mixture will equal the clean signal. This sample is degenerate and should be excluded or resampled.
+  noisy, clean, _ = mix_speech_and_noise(clean, noise, target_snr_db=snr_db)
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\data\real_dataset_loader.py:527: RuntimeWarning: mix_speech_and_noise: noise segment is all-zero; target_snr_db=8.72 CANNOT be achieved and the returned mixture will equal the clean signal. This sample is degenerate and should be excluded or resampled.
+  noisy, clean, _ = mix_speech_and_noise(clean, noise, target_snr_db=snr_db)
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\data\real_dataset_loader.py:527: RuntimeWarning: mix_speech_and_noise: noise segment is all-zero; target_snr_db=-7.13 CANNOT be achieved and the returned mixture will equal the clean signal. This sample is degenerate and should be excluded or resampled.
+  noisy, clean, _ = mix_speech_and_noise(clean, noise, target_snr_db=snr_db)
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\data\real_dataset_loader.py:527: RuntimeWarning: mix_speech_and_noise: noise segment is all-zero; target_snr_db=3.12 CANNOT be achieved and the returned mixture will equal the clean signal. This sample is degenerate and should be excluded or resampled.
+  noisy, clean, _ = mix_speech_and_noise(clean, noise, target_snr_db=snr_db)
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\data\real_dataset_loader.py:527: RuntimeWarning: mix_speech_and_noise: noise segment is all-zero; target_snr_db=7.48 CANNOT be achieved and the returned mixture will equal the clean signal. This sample is degenerate and should be excluded or resampled.
+  noisy, clean, _ = mix_speech_and_noise(clean, noise, target_snr_db=snr_db)
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\data\real_dataset_loader.py:527: RuntimeWarning: mix_speech_and_noise: noise segment is all-zero; target_snr_db=6.59 CANNOT be achieved and the returned mixture will equal the clean signal. This sample is degenerate and should be excluded or resampled.
+  noisy, clean, _ = mix_speech_and_noise(clean, noise, target_snr_db=snr_db)
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\data\real_dataset_loader.py:527: RuntimeWarning: mix_speech_and_noise: noise segment is all-zero; target_snr_db=-6.34 CANNOT be achieved and the returned mixture will equal the clean signal. This sample is degenerate and should be excluded or resampled.
+  noisy, clean, _ = mix_speech_and_noise(clean, noise, target_snr_db=snr_db)
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\data\real_dataset_loader.py:527: RuntimeWarning: mix_speech_and_noise: noise segment is all-zero; target_snr_db=-9.56 CANNOT be achieved and the returned mixture will equal the clean signal. This sample is degenerate and should be excluded or resampled.
+  noisy, clean, _ = mix_speech_and_noise(clean, noise, target_snr_db=snr_db)
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\data\real_dataset_loader.py:527: RuntimeWarning: mix_speech_and_noise: noise segment is all-zero; target_snr_db=5.41 CANNOT be achieved and the returned mixture will equal the clean signal. This sample is degenerate and should be excluded or resampled.
+  noisy, clean, _ = mix_speech_and_noise(clean, noise, target_snr_db=snr_db)
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\data\real_dataset_loader.py:527: RuntimeWarning: mix_speech_and_noise: noise segment is all-zero; target_snr_db=13.82 CANNOT be achieved and the returned mixture will equal the clean signal. This sample is degenerate and should be excluded or resampled.
+  noisy, clean, _ = mix_speech_and_noise(clean, noise, target_snr_db=snr_db)
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\data\real_dataset_loader.py:527: RuntimeWarning: mix_speech_and_noise: noise segment is all-zero; target_snr_db=13.22 CANNOT be achieved and the returned mixture will equal the clean signal. This sample is degenerate and should be excluded or resampled.
+  noisy, clean, _ = mix_speech_and_noise(clean, noise, target_snr_db=snr_db)
+Traceback (most recent call last):
+  File "C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\scripts\run_phase24_disjoint_100h.py", line 235, in <module>
+    main()
+  File "C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\scripts\run_phase24_disjoint_100h.py", line 181, in main
+    for b in val_loader:
+  File "C:\Users\eashw\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\utils\data\dataloader.py", line 741, in __next__
+    data = self._next_data()
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\eashw\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\utils\data\dataloader.py", line 1548, in _next_data
+    return self._process_data(data, worker_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\eashw\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\utils\data\dataloader.py", line 1586, in _process_data
+    data.reraise()
+  File "C:\Users\eashw\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\_utils.py", line 785, in reraise
+    raise exception
+RuntimeError: Caught RuntimeError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "C:\Users\eashw\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\utils\data\_utils\worker.py", line 358, in _worker_loop
+    data = fetcher.fetch(index)  # type: ignore[possibly-undefined]
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\eashw\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\utils\data\_utils\fetch.py", line 57, in fetch
+    return self.collate_fn(data)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\eashw\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\utils\data\_utils\collate.py", line 401, in default_collate
+    return collate(batch, collate_fn_map=default_collate_fn_map)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\eashw\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\utils\data\_utils\collate.py", line 171, in collate
+    {
+  File "C:\Users\eashw\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\utils\data\_utils\collate.py", line 172, in <dictcomp>
+    key: collate(
+         ^^^^^^^^
+  File "C:\Users\eashw\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\utils\data\_utils\collate.py", line 155, in collate
+    return collate_fn_map[elem_type](batch, collate_fn_map=collate_fn_map)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\eashw\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\utils\data\_utils\collate.py", line 273, in collate_tensor_fn
+    storage = elem._typed_storage()._new_shared(numel, device=elem.device)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\eashw\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\storage.py", line 1210, in _new_shared
+    untyped_storage = torch.UntypedStorage._new_shared(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\eashw\AppData\Local\Programs\Python\Python311\Lib\site-packages\torch\storage.py", line 412, in _new_shared
+    return cls._new_using_filename_cpu(size)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Couldn't open shared file mapping: <torch_18272_1027754605_0>, error code: <1455>
+
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\data\real_dataset_loader.py:527: RuntimeWarning: mix_speech_and_noise: noise segment is all-zero; target_snr_db=7.43 CANNOT be achieved and the returned mixture will equal the clean signal. This sample is degenerate and should be excluded or resampled.
+  noisy, clean, _ = mix_speech_and_noise(clean, noise, target_snr_db=snr_db)
+C:\Users\eashw\OneDrive\Documents\SIH_PROJECT\data\real_dataset_loader.py:527: RuntimeWarning: mix_speech_and_noise: noise segment is all-zero; target_snr_db=-2.07 CANNOT be achieved and the returned mixture will equal the clean signal. This sample is degenerate and should be excluded or resampled.
+  noisy, clean, _ = mix_speech_and_noise(clean, noise, target_snr_db=snr_db)

@@ -1,0 +1,46 @@
+{
+  "frozen_utc": "2026-08-30T17:07:16+00:00",
+  "purpose": "Reference val/test file lists. Every published metric was measured on these exact files. verify_eval_splits_frozen() raises if they change.",
+  "split_function": "md5(filepath) % 100 -> train <80, val 80-90, test >=90",
+  "pinned_sources": {
+    "librispeech_train100": "train"
+  },
+  "fingerprint": {
+    "val": {
+      "clean_speech": {
+        "n_files": 346,
+        "sha256": "0ffa1f5a3a42b67820def1d3f2bf61779a09148d96948ef7c10274d6d2279305"
+      },
+      "generic_noise": {
+        "n_files": 269,
+        "sha256": "a4777c1967f37a07798bf87e0f8c143350956e098bd538431966e70423ba8ee9"
+      },
+      "tactical_noise": {
+        "n_files": 40,
+        "sha256": "a4a3a0941d0725a875bfd4d2b833d80b6c091d892ed37c684df032e9647c1322"
+      },
+      "rirs": {
+        "n_files": 11,
+        "sha256": "873d95e9a3485493df94f8d5be1e80c91b3f2276fc5612b0f5eddab575d68b9c"
+      }
+    },
+    "test": {
+      "clean_speech": {
+        "n_files": 342,
+        "sha256": "917a5e42c22a92bf7ea6eb614d6b91ec1af573986c9f8af1a18d14fbd0d99720"
+      },
+      "generic_noise": {
+        "n_files": 275,
+        "sha256": "5efdc2c87dd849b6030ecf048f616e1e77792022052e42b7de615d79989ddcfb"
+      },
+      "tactical_noise": {
+        "n_files": 34,
+        "sha256": "399094c35a28de2aacd5a27ea64b8e7d5cff193b1b08e573efc4347a025f1d51"
+      },
+      "rirs": {
+        "n_files": 14,
+        "sha256": "ead1ece4b1377ac9e03db324153b93c37ebe530b0d38133c853ac320c8b9e664"
+      }
+    }
+  }
+}

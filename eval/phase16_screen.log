@@ -1,0 +1,72 @@
+[Phase16] device=cpu threads=24
+[Phase16] budget per arm: 8 epochs x 900 steps, lr=0.001, seed=42
+
+========================================================================================
+[Phase16] ARM C1-S0_tanh_control  mask_mode=component_tanh
+========================================================================================
+
+================================================================================
+ Starting Full 50-Epoch Retrain: C1-S0_tanh_control
+ Norm: batch | Mask Mode: component_tanh | Bound K: 1.0
+ Epochs: 8 | Steps/Epoch: 900 | LR: 0.001 | Save: checkpoints/phase16_screen_tanh_control
+================================================================================
+[Metric Engine] Active PESQ backend: Psychoacoustic Bark-distortion fallback (MSVC build tools not detected)
+[C1-S0_tanh_control] Epoch [01/08] (25.7s, lr=9.6e-04) | Train Loss: 5.5338 | Val Loss: 3.6742 | Val SNR: +3.92dB | STOI: 0.8163 | Score: 12.08 >>> [BEST]
+[C1-S0_tanh_control] Epoch [02/08] (25.5s, lr=8.6e-04) | Train Loss: 4.7561 | Val Loss: 3.4059 | Val SNR: +4.23dB | STOI: 0.8188 | Score: 12.42 >>> [BEST]
+[C1-S0_tanh_control] Epoch [03/08] (25.5s, lr=6.9e-04) | Train Loss: 4.5660 | Val Loss: 2.9423 | Val SNR: +4.81dB | STOI: 0.8166 | Score: 12.97 >>> [BEST]
+[C1-S0_tanh_control] Epoch [04/08] (25.5s, lr=5.1e-04) | Train Loss: 3.9999 | Val Loss: 2.7972 | Val SNR: +4.92dB | STOI: 0.8112 | Score: 13.04 >>> [BEST]
+[C1-S0_tanh_control] Epoch [05/08] (25.6s, lr=3.2e-04) | Train Loss: 3.4908 | Val Loss: 2.4150 | Val SNR: +5.90dB | STOI: 0.8121 | Score: 14.02 >>> [BEST]
+[C1-S0_tanh_control] Epoch [06/08] (25.9s, lr=1.5e-04) | Train Loss: 3.5697 | Val Loss: 2.3752 | Val SNR: +5.94dB | STOI: 0.8317 | Score: 14.26 >>> [BEST]
+[C1-S0_tanh_control] Epoch [07/08] (26.5s, lr=4.8e-05) | Train Loss: 3.2953 | Val Loss: 2.3476 | Val SNR: +6.12dB | STOI: 0.8352 | Score: 14.47 >>> [BEST]
+[C1-S0_tanh_control] Epoch [08/08] (25.6s, lr=1.0e-05) | Train Loss: 3.2942 | Val Loss: 2.2367 | Val SNR: +6.31dB | STOI: 0.8317 | Score: 14.63 >>> [BEST]
+   >>> C1-S0_tanh_control training finished. Best model saved to checkpoints/phase16_screen_tanh_control/best_model.pt (Score: 14.63)
+[Phase16] C1-S0_tanh_control done in 3.5 min -> {'mask_mode': 'component_tanh', 'save_dir': 'checkpoints/phase16_screen_tanh_control', 'minutes': 3.5, 'best_epoch': 8, 'best_val_snr': 6.3123, 'best_val_stoi': 0.8317, 'best_op_score': 14.6296}
+
+========================================================================================
+[Phase16] ARM C1-S1_linear_clamp  mask_mode=component_clamp
+========================================================================================
+
+================================================================================
+ Starting Full 50-Epoch Retrain: C1-S1_linear_clamp
+ Norm: batch | Mask Mode: component_clamp | Bound K: 1.0
+ Epochs: 8 | Steps/Epoch: 900 | LR: 0.001 | Save: checkpoints/phase16_screen_linear_clamp
+================================================================================
+[C1-S1_linear_clamp] Epoch [01/08] (25.4s, lr=9.6e-04) | Train Loss: 5.7904 | Val Loss: 3.9687 | Val SNR: +3.44dB | STOI: 0.8138 | Score: 11.57 >>> [BEST]
+[C1-S1_linear_clamp] Epoch [02/08] (25.2s, lr=8.6e-04) | Train Loss: 5.1010 | Val Loss: 3.6742 | Val SNR: +3.65dB | STOI: 0.8095 | Score: 11.75 >>> [BEST]
+[C1-S1_linear_clamp] Epoch [04/08] (25.1s, lr=5.1e-04) | Train Loss: 4.4906 | Val Loss: 3.3101 | Val SNR: +4.08dB | STOI: 0.7933 | Score: 12.01 >>> [BEST]
+[C1-S1_linear_clamp] Epoch [05/08] (25.1s, lr=3.2e-04) | Train Loss: 4.0443 | Val Loss: 3.0433 | Val SNR: +4.50dB | STOI: 0.8007 | Score: 12.50 >>> [BEST]
+[C1-S1_linear_clamp] Epoch [06/08] (25.1s, lr=1.5e-04) | Train Loss: 4.1454 | Val Loss: 2.9975 | Val SNR: +4.55dB | STOI: 0.8046 | Score: 12.60 >>> [BEST]
+[C1-S1_linear_clamp] Epoch [07/08] (25.0s, lr=4.8e-05) | Train Loss: 3.8856 | Val Loss: 2.9632 | Val SNR: +4.72dB | STOI: 0.8121 | Score: 12.84 >>> [BEST]
+[C1-S1_linear_clamp] Epoch [08/08] (25.3s, lr=1.0e-05) | Train Loss: 3.8855 | Val Loss: 2.8810 | Val SNR: +4.83dB | STOI: 0.8080 | Score: 12.91 >>> [BEST]
+   >>> C1-S1_linear_clamp training finished. Best model saved to checkpoints/phase16_screen_linear_clamp/best_model.pt (Score: 12.91)
+[Phase16] C1-S1_linear_clamp done in 3.4 min -> {'mask_mode': 'component_clamp', 'save_dir': 'checkpoints/phase16_screen_linear_clamp', 'minutes': 3.4, 'best_epoch': 8, 'best_val_snr': 4.8267, 'best_val_stoi': 0.808, 'best_op_score': 12.9072}
+
+========================================================================================
+[Phase16] ARM C1-S2_leaky_clamp  mask_mode=component_leaky_clamp
+========================================================================================
+
+================================================================================
+ Starting Full 50-Epoch Retrain: C1-S2_leaky_clamp
+ Norm: batch | Mask Mode: component_leaky_clamp | Bound K: 1.0
+ Epochs: 8 | Steps/Epoch: 900 | LR: 0.001 | Save: checkpoints/phase16_screen_leaky_clamp
+================================================================================
+[C1-S2_leaky_clamp] Epoch [01/08] (25.6s, lr=9.6e-04) | Train Loss: 6.8589 | Val Loss: 4.3306 | Val SNR: +2.41dB | STOI: 0.8015 | Score: 10.42 >>> [BEST]
+[C1-S2_leaky_clamp] Epoch [02/08] (25.6s, lr=8.6e-04) | Train Loss: 5.3712 | Val Loss: 3.9264 | Val SNR: +3.08dB | STOI: 0.8111 | Score: 11.19 >>> [BEST]
+[C1-S2_leaky_clamp] Epoch [03/08] (28.1s, lr=6.9e-04) | Train Loss: 5.0262 | Val Loss: 3.3958 | Val SNR: +3.92dB | STOI: 0.8155 | Score: 12.07 >>> [BEST]
+[C1-S2_leaky_clamp] Epoch [05/08] (28.5s, lr=3.2e-04) | Train Loss: 4.0041 | Val Loss: 2.8205 | Val SNR: +5.11dB | STOI: 0.8221 | Score: 13.33 >>> [BEST]
+[C1-S2_leaky_clamp] Epoch [07/08] (27.8s, lr=4.8e-05) | Train Loss: 3.7909 | Val Loss: 2.8213 | Val SNR: +5.25dB | STOI: 0.8255 | Score: 13.51 >>> [BEST]
+[C1-S2_leaky_clamp] Epoch [08/08] (27.9s, lr=1.0e-05) | Train Loss: 3.7540 | Val Loss: 2.6835 | Val SNR: +5.42dB | STOI: 0.8253 | Score: 13.67 >>> [BEST]
+   >>> C1-S2_leaky_clamp training finished. Best model saved to checkpoints/phase16_screen_leaky_clamp/best_model.pt (Score: 13.67)
+[Phase16] C1-S2_leaky_clamp done in 3.7 min -> {'mask_mode': 'component_leaky_clamp', 'save_dir': 'checkpoints/phase16_screen_leaky_clamp', 'minutes': 3.7, 'best_epoch': 8, 'best_val_snr': 5.4171, 'best_val_stoi': 0.8253, 'best_op_score': 13.6702}
+
+========================================================================================
+PHASE 16 SCREENING SUMMARY (validation split)
+========================================================================================
+arm                        mask_mode                  val SNR  val STOI    score
+C1-S0_tanh_control         component_tanh                6.31    0.8317    14.63
+C1-S1_linear_clamp         component_clamp               4.83    0.8080    12.91
+C1-S2_leaky_clamp          component_leaky_clamp         5.42    0.8253    13.67
+
+Promote rule: beat control by > 1.0 dB val Output SNR at identical budget.
+  C1-S1_linear_clamp         delta vs control =  -1.49 dB  -> do not promote
+  C1-S2_leaky_clamp          delta vs control =  -0.90 dB  -> do not promote

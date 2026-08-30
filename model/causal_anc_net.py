@@ -284,14 +284,42 @@ class CausalANCNet(nn.Module):
         mask = self.dec_deconv1(d1_cat)                              # (B, 2, 257, T)
         if mask.shape[2] != F_dim:
             mask = mask[:, :, :F_dim, :]
-        if self.mask_mode == "polar_tanh":
+        if self.mask_mode == "component_clamp":
+            # Phase 16: LINEAR-in-interior bounding at the same |M| <= K limit.
+            #
+            # Motivation (scripts/oracle_mask_shape_probe.py, validation split): pushing the
+            # IDEAL complex ratio mask through tanh caps oracle output SNR at 12.99 dB -- which
+            # is essentially exactly where every trained model in Phases 1-11 landed (12.75 dB).
+            # Clamping that same ideal mask to the SAME [-1, 1] bound instead reaches 28.52 dB.
+            # The ceiling is therefore the CURVATURE of tanh inside the bound, not the bound:
+            # tanh(1) = 0.76, so a bin that ought to pass at unity gain never passes more than
+            # 76% of it, and speech energy is systematically removed.
+            #
+            # Phases 9-10 swept the BOUND (K = 1.5 .. 3.0) and it monotonically hurt, because a
+            # wider bound lets the network amplify noise-dominated bins. This is the orthogonal
+            # change: keep the unit bound that provably regularises, drop the interior squashing.
+            # hardtanh is exactly clamp() with gradient 1 inside the bound and 0 outside.
+            K = self.mask_bound
+            mask = torch.nn.functional.hardtanh(mask, -K, K)
+            mask_r = mask[:, 0, :, :]
+            mask_i = mask[:, 1, :, :]
+        elif self.mask_mode == "component_leaky_clamp":
+            # As above, but with a small slope retained outside the bound so a saturated unit
+            # still receives gradient and can recover. Guards against the dead-unit failure mode
+            # that a hard clamp can introduce early in training.
+            K = self.mask_bound
+            slope = 0.05
+            mask = torch.nn.functional.hardtanh(mask, -K, K) + slope * (mask - mask.clamp(-K, K))
+            mask_r = mask[:, 0, :, :]
+            mask_i = mask[:, 1, :, :]
+        elif self.mask_mode == "polar_tanh":
             # Polar magnitude bounding with exact phase preservation
             raw_r = mask[:, 0, :, :]
             raw_i = mask[:, 1, :, :]
             raw_mag = torch.sqrt(raw_r ** 2 + raw_i ** 2 + 1e-12)
             phase_cos = raw_r / raw_mag
             phase_sin = raw_i / raw_mag
-            
+
             K = self.mask_bound
             bounded_mag = K * torch.tanh(raw_mag / K)
             mask_r = bounded_mag * phase_cos

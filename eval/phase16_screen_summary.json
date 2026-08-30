@@ -1,0 +1,29 @@
+{
+  "C1-S0_tanh_control": {
+    "mask_mode": "component_tanh",
+    "save_dir": "checkpoints/phase16_screen_tanh_control",
+    "minutes": 3.5,
+    "best_epoch": 8,
+    "best_val_snr": 6.3123,
+    "best_val_stoi": 0.8317,
+    "best_op_score": 14.6296
+  },
+  "C1-S1_linear_clamp": {
+    "mask_mode": "component_clamp",
+    "save_dir": "checkpoints/phase16_screen_linear_clamp",
+    "minutes": 3.4,
+    "best_epoch": 8,
+    "best_val_snr": 4.8267,
+    "best_val_stoi": 0.808,
+    "best_op_score": 12.9072
+  },
+  "C1-S2_leaky_clamp": {
+    "mask_mode": "component_leaky_clamp",
+    "save_dir": "checkpoints/phase16_screen_leaky_clamp",
+    "minutes": 3.7,
+    "best_epoch": 8,
+    "best_val_snr": 5.4171,
+    "best_val_stoi": 0.8253,
+    "best_op_score": 13.6702
+  }
+}

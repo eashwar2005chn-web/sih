@@ -21,7 +21,10 @@ ENV/
 *.swo
 
 # Large Raw Audio Datasets
-data/
+# NOTE: 'data/' was listed here, but data/ holds SOURCE MODULES (real_dataset_loader.py,
+# defence_noise_generator.py, dataset_builder.py) totalling ~160 KB and no audio at all.
+# Ignoring it left the entire data pipeline out of version control, so a fresh clone could
+# not run. The raw audio lives under datasets/, which is still ignored below.
 datasets/
 *.wav
 *.flac
@@ -30,3 +33,12 @@ datasets/
 # Intermediate epoch checkpoints (keep best models and evaluation CSVs)
 checkpoints/**/epoch_*.pt
 checkpoints/**/latest_model.pt
+
+# Android Local & Build Artifacts
+local.properties
+.gradle/
+build/
+app/build/
+*.apk
+*.aar
+

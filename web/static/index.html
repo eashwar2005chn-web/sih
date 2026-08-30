@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adaptive Noise Cancellation — PS 26052</title>
+  <meta name="description" content="Offline-first field recording PWA and causal speech-enhancement system for DRDO tactical communications.">
+
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0b1020">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="clean-app">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="top-header">
+    <div class="header-brand">
+      <span class="org-title">DRDO Problem Statement 26052</span>
+      <h1 class="project-title">Adaptive Noise Cancellation</h1>
+    </div>
+
+    <div class="header-meta">
+      <button id="btnPwaHeaderInstall" class="btn btn-secondary hidden" style="margin-right: 8px;">
+        📲 Install App
+      </button>
+
+      <div class="control-group-inline">
+        <label for="globalModelSelect" class="field-label">Model in use</label>
+        <select id="globalModelSelect" class="input-select">
+          <option value="baseline_811k" selected>Baseline — 811K parameters (recommended)</option>
+          <option value="scaled_v2">Scaled capacity — 3.24M parameters</option>
+          <option value="phase11_tcn">Temporal convolutional — 899K parameters</option>
+          <option value="phase10_norm">Causal normalisation — 811K parameters</option>
+          <option value="openvino_int8">Quantised INT8 — 1.46 MB</option>
+        </select>
+      </div>
+
+      <div class="system-status-pills">
+        <div class="status-pill">
+          <span class="status-indicator-dot"></span>
+          <span id="hwDeviceText">Ready</span>
+        </div>
+        <div class="status-pill">
+          <span>~0.09 ms per frame</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== TABS NAVIGATION ===================== -->
+  <nav class="tabs-navigation">
+    <button class="tab-button active" data-tab="tab-landing">
+      <span>Overview</span>
+    </button>
+    <button class="tab-button" data-tab="tab-recorder">
+      <span>🎙 Field Recorder</span>
+    </button>
+    <button class="tab-button" data-tab="tab-library">
+      <span>📁 Library</span>
+      <span class="tab-count" id="libraryCount">0</span>
+    </button>
+    <button class="tab-button" data-tab="tab-sync">
+      <span>🔄 Sync Engine</span>
+      <span class="tab-count" id="syncQueueBadge">0</span>
+    </button>
+    <button class="tab-button" data-tab="tab-voicelogger">
+      <span>🛡 24/7 Voice Logger</span>
+      <span class="tab-count" id="loggerAlertBadge" style="background: var(--color-danger-soft); color: var(--color-danger);">0</span>
+    </button>
+    <button class="tab-button" data-tab="tab-settings">
+      <span>⚙️ Settings</span>
+    </button>
+    <button class="tab-button" data-tab="tab-prerecorded">
+      <span>Test samples</span>
+      <span class="tab-count">15</span>
+    </button>
+    <button class="tab-button" data-tab="tab-simulator">
+      <span>Build a clip</span>
+    </button>
+    <button class="tab-button" data-tab="tab-custom">
+      <span>Custom audio</span>
+    </button>
+    <button class="tab-button" data-tab="tab-drdo">
+      <span>Scorecard</span>
+    </button>
+  </nav>
+
+  <main class="main-container">
+
+    <!-- Global Network Banner -->
+    <div id="offlineBanner" class="offline-banner hidden">
+      <span id="offlineBannerText">Offline Mode — Recordings stored locally in IndexedDB</span>
+      <span class="status-text" id="offlineBannerSub">Auto-syncs when online</span>
+    </div>
+
+    <!-- ============ TAB 0: LANDING PAGE ============ -->
+    <section id="tab-landing" class="tab-panel active">
+      <div class="hero-card">
+        <h2 class="hero-title">DRDO PS 26052 — Offline-First Tactical Field Recorder</h2>
+        <p class="hero-subtitle">
+          A high-performance Progressive Web App (PWA) designed for defence communications operators.
+          Record high-fidelity audio offline in high-stress field conditions with zero connectivity, store
+          data durably in local IndexedDB, and automatically sync to command endpoints once online.
+        </p>
+
+        <div class="hero-metrics-grid">
+          <div class="hero-metric-box">
+            <div class="hero-metric-val">15.26 dB</div>
+            <div class="hero-metric-lbl">Output SNR</div>
+          </div>
+          <div class="hero-metric-box">
+            <div class="hero-metric-val">0.9309</div>
+            <div class="hero-metric-lbl">STOI Intelligibility</div>
+          </div>
+          <div class="hero-metric-box">
+            <div class="hero-metric-val">3.1 MB</div>
+            <div class="hero-metric-lbl">Model Footprint</div>
+          </div>
+          <div class="hero-metric-box">
+            <div class="hero-metric-val">0.0085</div>
+            <div class="hero-metric-lbl">Real-Time Factor</div>
+          </div>
+        </div>
+
+        <div class="inline-actions">
+          <button class="btn-primary" onclick="window.switchTab('tab-recorder')">
+            <span>🎙 Launch Field Recorder</span>
+          </button>
+          <button id="btnHeroPwaInstall" class="btn-secondary hidden">
+            <span>📲 Install PWA to Device</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <h3 class="card-title">How It Works in Intermittent Environments</h3>
+        <div class="how-it-works-grid">
+          <div class="step-card">
+            <span class="step-number">1</span>
+            <h4 class="step-title">Record Offline</h4>
+            <p class="step-desc">
+              Capture 16&nbsp;kHz mono speech directly from the microphone in airplane mode. Zero network involved.
+            </p>
+          </div>
+          <div class="step-card">
+            <span class="step-number">2</span>
+            <h4 class="step-title">Durable Local Storage</h4>
+            <p class="step-desc">
+              Recordings are saved to IndexedDB (not localStorage) with explicit quota monitoring and state tracking.
+            </p>
+          </div>
+          <div class="step-card">
+            <span class="step-number">3</span>
+            <h4 class="step-title">Automatic Background Sync</h4>
+            <p class="step-desc">
+              Serial, idempotent queue uploads to the SQLite server once network returns, updating state only after server confirmation.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 1: FIELD RECORDER ============ -->
+    <section id="tab-recorder" class="tab-panel">
+      <div class="content-card">
+        <div class="card-header-block">
+          <h2 class="card-title">Field Recording Terminal</h2>
+          <p class="card-description">
+            Operates 100% offline. Microphone permissions are requested only when recording starts.
+          </p>
+        </div>
+
+        <!-- Unmistakable Live Recording Indicator -->
+        <div id="recordingActiveBanner" class="recording-active-banner hidden">
+          <span class="recording-dot"></span>
+          <span>MICROPHONE LIVE — RECORDING IN PROGRESS</span>
+        </div>
+
+        <div class="recorder-widget">
+          <button id="btnRecordGiant" class="record-btn-giant" aria-label="Start recording">
+            <span class="rec-icon-symbol">🎙</span>
+          </button>
+          <div id="recTimerDisplay" class="timer-display">00:00.0</div>
+
+          <canvas id="liveMeterCanvas" class="meter-canvas" width="480" height="64"></canvas>
+
+          <div style="margin-top: 20px; width: 100%; max-width: 380px;">
+            <label for="micDeviceSelect" class="field-label">Microphone Source</label>
+            <select id="micDeviceSelect" class="input-select"></select>
+          </div>
+        </div>
+
+        <div class="status-text" id="recStatusText" style="text-align: center;">
+          Ready to record offline.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 2: LIBRARY ============ -->
+    <section id="tab-library" class="tab-panel">
+      <div class="content-card">
+        <div class="card-header-block">
+          <h2 class="card-title">Local Field Recordings</h2>
+          <p class="card-description">
+            Stored durably in client IndexedDB. Items transition to "synced" only after server confirmation.
+          </p>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>State</th>
+                <th>Created At</th>
+                <th>Duration</th>
+                <th>Format</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="libraryTableBody">
+              <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No field recordings stored.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 3: SYNC PANEL ============ -->
+    <section id="tab-sync" class="tab-panel">
+      <div class="content-card">
+        <div class="card-header-block">
+          <h2 class="card-title">Background Sync Engine</h2>
+          <p class="card-description">
+            Monitors connectivity and processes the upload queue serially (oldest first) with exponential backoff on failure.
+          </p>
+        </div>
+
+        <div class="two-col-grid" style="margin-bottom: 20px;">
+          <div class="hero-metric-box">
+            <div class="hero-metric-val" id="syncQueueDepthVal">0</div>
+            <div class="hero-metric-lbl">Queue Depth</div>
+          </div>
+          <div class="hero-metric-box">
+            <div class="hero-metric-val" id="syncLastTimeVal" style="font-size: 16px;">Never</div>
+            <div class="hero-metric-lbl">Last Sync Time</div>
+          </div>
+        </div>
+
+        <div class="inline-actions" style="margin-bottom: 20px;">
+          <button id="btnSyncNow" class="btn-primary">
+            <span>🔄 Trigger Manual Sync</span>
+          </button>
+          <span id="syncEngineStatusText" class="status-text">Idle</span>
+        </div>
+
+        <h3 class="subsection-title" style="margin-bottom: 12px;">Queue & Item Details</h3>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID (UUID)</th>
+                <th>State</th>
+                <th>Attempts</th>
+                <th>Last Error</th>
+              </tr>
+            </thead>
+            <tbody id="syncLogTableBody">
+              <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No items in queue log.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB: 24/7 VOICE LOGGER OPERATOR DASHBOARD ============ -->
+    <section id="tab-voicelogger" class="tab-panel">
+      <div class="content-card">
+        <div class="card-header-block">
+          <h2 class="card-title">24/7 Tactical Voice Logger Operator Console</h2>
+          <p class="card-description">
+            Live overview of continuous hourly logbook entries, tamper-evident SHA-256 Hash Chain verification, emergency SOS alerts, and append-only audit trail logs.
+          </p>
+        </div>
+
+        <!-- Emergency SOS Status Banner -->
+        <div id="loggerSosBanner" class="recording-active-banner hidden" style="background: rgba(220, 38, 38, 0.15); border-color: #dc2626; color: #dc2626;">
+          <span class="recording-dot" style="background: #dc2626;"></span>
+          <span id="loggerSosBannerText">🚨 EMERGENCY SOS ALERT ACTIVE — FIELD UNIT DISPATCHED</span>
+        </div>
+
+        <!-- Hash Chain Integrity Card -->
+        <div class="two-col-grid" style="margin-bottom: 20px;">
+          <div class="hero-metric-box">
+            <div id="chainStatusValue" class="hero-metric-val" style="color: var(--color-success);">VALID</div>
+            <div class="hero-metric-lbl">SHA-256 Hash Chain Integrity</div>
+          </div>
+          <div class="hero-metric-box">
+            <div id="chainTotalEntriesVal" class="hero-metric-val">0</div>
+            <div class="hero-metric-lbl">Total Synced Logbook Entries</div>
+          </div>
+        </div>
+
+        <div class="inline-actions" style="margin-bottom: 20px;">
+          <button id="btnVerifyHashChain" class="btn-primary">
+            <span>🛡 Verify SHA-256 Hash Chain</span>
+          </button>
+          <button id="btnRefreshLoggerData" class="btn-secondary">
+            <span>🔄 Refresh Logbook Stream</span>
+          </button>
+        </div>
+
+        <!-- Hourly Logbook Stream Table -->
+        <h3 class="subsection-title" style="margin-bottom: 12px;">Hourly Logbook Timeline</h3>
+        <div class="table-container" style="margin-bottom: 24px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Classification</th>
+                <th>Timestamp</th>
+                <th>Duration</th>
+                <th>Speech (VAD)</th>
+                <th>SHA-256 Hash Link</th>
+                <th>Level Reduction</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="voiceloggerTableBody">
+              <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No logbook entries synced yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- System Audit Trail Table -->
+        <h3 class="subsection-title" style="margin-bottom: 12px;">System Audit Trail (Append-Only)</h3>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Event Type</th>
+                <th>Timestamp</th>
+                <th>Event Details</th>
+                <th>Audit Hash</th>
+              </tr>
+            </thead>
+            <tbody id="auditLogTableBody">
+              <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No audit log events recorded.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============ TAB 4: SETTINGS ============ -->
+    <section id="tab-settings" class="tab-panel">
+      <div class="content-card">
+        <div class="card-header-block">
+          <h2 class="card-title">App Settings & Storage</h2>
+          <p class="card-description">
+            Configure remote endpoint and monitor local IndexedDB storage quota.
+          </p>
+        </div>
+
+        <div class="form-grid-layout" style="margin-bottom: 24px;">
+          <div class="form-group span-all">
+            <label for="inputEndpointUrl" class="field-label">Sync Endpoint URL</label>
+            <input type="text" id="inputEndpointUrl" class="input-select" value="/api/recordings">
+            <p class="upload-subtitle" style="margin-top: 4px;">Default server endpoint for uploading field recordings.</p>
+          </div>
+          <div class="form-group span-all">
+            <button id="btnSaveEndpoint" class="btn-secondary">Save Endpoint Settings</button>
+          </div>
+        </div>
+
+        <div class="section-divider">
+          <h3 class="subsection-title">IndexedDB Storage Monitor</h3>
+          <div id="storageStatusText" class="status-text">Estimating storage usage...</div>
+
+          <div class="storage-bar-outer">
+            <div id="storageProgressBar" class="storage-bar-inner"></div>
+          </div>
+
+          <div class="inline-actions" style="margin-top: 14px;">
+            <button id="btnClearLocalData" class="btn-secondary" style="border-color: var(--color-danger); color: var(--color-danger);">
+              🗑 Clear Local Data
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 5: TEST SAMPLES (PRESERVED) ============ -->
+    <section id="tab-prerecorded" class="tab-panel">
+      <div class="content-card">
+        <div class="card-header-block">
+          <h2 class="card-title">Samples from the held-out test set</h2>
+          <p class="card-description">
+            These clips were never seen during training. Pick any row to load it into the player below.
+          </p>
+        </div>
+
+        <div class="filter-row">
+          <button class="btn-filter active" data-bucket="all">All</button>
+          <button class="btn-filter" data-bucket="stress_-10_-5">Brutal (−10 to −5 dB)</button>
+          <button class="btn-filter" data-bucket="stress_-5_0">Hard (−5 to 0 dB)</button>
+          <button class="btn-filter" data-bucket="op_0_5">Noisy (0 to 5 dB)</button>
+          <button class="btn-filter" data-bucket="op_5_10">Moderate (5 to 10 dB)</button>
+          <button class="btn-filter" data-bucket="op_10_15">Mild (10 to 15 dB)</button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table" id="clipsTable">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Clip</th>
+                <th>Difficulty</th>
+                <th>Noise</th>
+                <th>Voice source</th>
+                <th>SNR in</th>
+                <th>SNR out</th>
+                <th>Clarity gain</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="clipsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 6: SIMULATOR (PRESERVED) ============ -->
+    <section id="tab-simulator" class="tab-panel">
+      <div class="content-card">
+        <div class="card-header-block">
+          <h2 class="card-title">Build your own noisy clip</h2>
+          <p class="card-description">
+            Mix a clean voice with a background noise of your choosing, then run it through the model.
+          </p>
+        </div>
+
+        <div class="form-grid-layout">
+          <div class="form-group">
+            <label class="field-label" for="simSpeechType">Voice</label>
+            <select id="simSpeechType" class="input-select">
+              <option value="synthetic" selected>Synthetic speech (fast)</option>
+              <option value="voicebank">VoiceBank — real speaker</option>
+              <option value="librispeech">LibriSpeech — real speaker</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="field-label" for="simNoiseType">Background noise</label>
+            <select id="simNoiseType" class="input-select">
+              <option value="helicopter" selected>Helicopter rotor</option>
+              <option value="gunshot">Gunfire</option>
+              <option value="jet">Jet flyby</option>
+              <option value="tank">Armoured vehicle</option>
+              <option value="cockpit">Cockpit</option>
+              <option value="radio_static">Radio static</option>
+              <option value="siren">Siren</option>
+              <option value="babble">Crowd babble</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <div class="slider-row">
+              <label class="field-label" for="simSnrSlider">Difficulty</label>
+              <span class="slider-value-display" id="simSnrVal">+5.0 dB</span>
+            </div>
+            <input type="range" id="simSnrSlider" min="-10" max="15" step="1" value="5" class="range-slider">
+          </div>
+
+          <div class="form-group">
+            <label class="field-label" for="simDuration">Clip length</label>
+            <select id="simDuration" class="input-select">
+              <option value="2.0">2 seconds</option>
+              <option value="3.0" selected>3 seconds</option>
+              <option value="4.0">4 seconds</option>
+            </select>
+          </div>
+
+          <div class="form-group span-all">
+            <div class="checkbox-card">
+              <input type="checkbox" id="simNlmsToggle" class="checkbox-input">
+              <div class="checkbox-content">
+                <span class="checkbox-title">Add the classical NLMS post-filter</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group span-all">
+            <button id="btnSynthesizeAndEnhance" class="btn-primary">
+              <span>Generate and clean it up</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 7: CUSTOM AUDIO (PRESERVED) ============ -->
+    <section id="tab-custom" class="tab-panel">
+      <div class="content-card">
+        <div class="card-header-block">
+          <h2 class="card-title">Use your own audio</h2>
+          <p class="card-description">
+            Upload a file or record straight from your microphone for online model processing.
+          </p>
+        </div>
+
+        <div class="upload-grid">
+          <div class="upload-box" id="audioDropzone">
+            <h3 class="upload-title">Drop a file here</h3>
+            <p class="upload-subtitle">WAV, MP3, FLAC or OGG — we'll handle the conversion.</p>
+            <button class="btn-secondary" onclick="document.getElementById('audioFileInput').click()">Browse files</button>
+            <input type="file" id="audioFileInput" accept="audio/*" class="file-input-hidden">
+            <div id="uploadFileInfo" class="file-info-tag hidden"></div>
+          </div>
+
+          <div class="upload-box">
+            <h3 class="upload-title">Or record yourself</h3>
+            <div class="inline-actions">
+              <button id="btnStartRecord" class="btn-secondary">
+                <span class="record-dot"></span> Start recording
+              </button>
+              <button id="btnStopRecord" class="btn-secondary hidden">Stop</button>
+            </div>
+            <span id="micStatus" class="status-text">Ready when you are</span>
+          </div>
+        </div>
+
+        <div class="section-divider">
+          <button id="btnProcessCustomAudio" class="btn-primary" disabled>
+            <span>Run it through the model</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAB 8: DRDO SCORECARD (PRESERVED) ============ -->
+    <section id="tab-drdo" class="tab-panel">
+      <div class="content-card">
+        <div class="card-header-block">
+          <h2 class="card-title">How it scores against the targets</h2>
+        </div>
+        <div class="scorecard-summary-grid" id="scorecardTargetCards"></div>
+      </div>
+    </section>
+
+    <!-- ============ PLAYER + LIVE METRICS (PRESERVED) ============ -->
+    <section class="bottom-dock">
+      <div class="content-card player-card">
+        <div class="player-top-row">
+          <div class="active-track-label">
+            <span class="track-meta">Now playing</span>
+            <span class="track-name" id="activeStreamTitle">Pick a clip or recording</span>
+          </div>
+          <div class="channel-btn-group">
+            <button class="channel-btn" data-channel="clean" id="btnChannelClean">Clean</button>
+            <button class="channel-btn" data-channel="noisy" id="btnChannelNoisy">Noisy</button>
+            <button class="channel-btn active" data-channel="enhanced" id="btnChannelEnhanced">Cleaned up</button>
+          </div>
+        </div>
+
+        <div class="canvas-frame">
+          <canvas id="oscilloscopeCanvas" class="canvas-element" width="800" height="120"></canvas>
+          <div class="canvas-tags">
+            <span class="canvas-mode-text">Live waveform</span>
+            <span class="channel-indicator-text tag-enhanced" id="canvasChannelLabel">Cleaned up</span>
+          </div>
+        </div>
+
+        <div class="transport-controls">
+          <button id="btnPlayPause" class="transport-btn btn-play" title="Play or pause">
+            <span id="playIcon">▶</span>
+          </button>
+          <button id="btnStop" class="transport-btn" title="Stop">
+            <span>■</span>
+          </button>
+          <span class="time-counter" id="timeDisplay">0:00 / 0:00</span>
+          <div class="scrubber-track">
+            <input type="range" id="audioScrubber" min="0" max="100" value="0" step="0.1" class="range-slider">
+          </div>
+          <span class="field-label">Vol</span>
+          <input type="range" id="audioVolume" min="0" max="1" step="0.05" value="0.85" class="range-slider" style="width: 64px;">
+          <button id="btnReEnhanceActive" class="btn-secondary">
+            <span>Re-run</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="card-header-block">
+          <h2 class="card-title">This clip, measured</h2>
+          <p class="card-description" id="telemetryModelSubtitle">Baseline model (811K parameters)</p>
+        </div>
+
+        <div class="telemetry-grid">
+          <div class="metric-tile">
+            <div class="metric-tile-header">
+              <span class="metric-tile-title">SNR out</span>
+              <span class="metric-tile-target">target &gt; 15.0</span>
+            </div>
+            <span class="metric-tile-value" id="gaugeValOutSnr">--</span>
+            <div class="metric-tile-footer">
+              <span>was <strong id="gaugeValInSnr">-- dB</strong></span>
+              <span class="metric-badge badge-unmet" id="badgeSnr">—</span>
+            </div>
+          </div>
+
+          <div class="metric-tile">
+            <div class="metric-tile-header">
+              <span class="metric-tile-title">Improvement</span>
+              <span class="metric-tile-target">higher is better</span>
+            </div>
+            <span class="metric-tile-value primary-color" id="gaugeValGain">--</span>
+            <div class="metric-tile-footer">
+              <span>noise removed</span>
+              <span id="gainArrow">dB</span>
+            </div>
+          </div>
+
+          <div class="metric-tile">
+            <div class="metric-tile-header">
+              <span class="metric-tile-title">Understandability</span>
+              <span class="metric-tile-target">target &gt; 0.850</span>
+            </div>
+            <span class="metric-tile-value success-color" id="gaugeValStoi">--</span>
+            <div class="metric-tile-footer">
+              <span>was <strong id="gaugeValInStoi">--</strong></span>
+              <span class="metric-badge badge-met" id="badgeStoi">—</span>
+            </div>
+          </div>
+
+          <div class="metric-tile">
+            <div class="metric-tile-header">
+              <span class="metric-tile-title">Speed</span>
+              <span class="metric-tile-target">target &lt; 1.0 ms</span>
+            </div>
+            <span class="metric-tile-value success-color" id="gaugeValLatency">--</span>
+            <div class="metric-tile-footer">
+              <span>RTF <strong id="gaugeValRtf">--</strong></span>
+              <span class="metric-badge badge-met" id="badgeLatency">PASS</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== MODALS ===================== -->
+  <!-- Mic Permission Modal -->
+  <div id="micPermissionModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3 class="modal-title">🎙 Microphone Access Required</h3>
+      <p class="modal-body">
+        To capture audio offline, the app requires access to your microphone. Your recordings are stored exclusively on your device until synced.
+      </p>
+      <div class="modal-actions">
+        <button id="btnCancelMicPerm" class="btn-secondary">Cancel</button>
+        <button id="btnGrantMicPerm" class="btn-primary">Grant Permission</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clear Data Modal -->
+  <div id="clearDataModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3 class="modal-title">⚠️ Clear Local Data</h3>
+      <p class="modal-body">
+        Are you sure you want to permanently delete all local IndexedDB recordings? Any unsynced recordings will be permanently lost.
+      </p>
+      <div class="modal-actions">
+        <button id="btnCancelClearData" class="btn-secondary">Cancel</button>
+        <button id="btnConfirmClearData" class="btn-primary" style="background: var(--color-danger); border-color: var(--color-danger);">
+          Permanently Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="audioElementClean" preload="auto"></audio>
+  <audio id="audioElementNoisy" preload="auto"></audio>
+  <audio id="audioElementEnhanced" preload="auto"></audio>
+
+  <!-- PWA & Application Scripts -->
+  <script src="/js/db.js"></script>
+  <script src="/js/sync.js"></script>
+  <script src="/js/visualizer.js"></script>
+  <script src="/js/app.js"></script>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('[PWA] ServiceWorker registered:', reg.scope))
+          .catch(err => console.error('[PWA] ServiceWorker registration failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>

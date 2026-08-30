@@ -1,0 +1,16 @@
+clip,bucket,noise_source,speech_source,target_snr_db,measured_in_snr_db,out_snr_db,in_stoi,out_stoi
+stress_-10_-5_00,stress_-10_-5,synth_jet_flyby,real:3853-163249-0033.flac,-6.14,-7.43,3.26,0.5472,0.5701
+stress_-10_-5_01,stress_-10_-5,synth_cockpit,real:1988-147956-0020.flac,-6.5,-4.08,6.08,0.8843,0.9442
+stress_-10_-5_02,stress_-10_-5,synth_gunshot,real:1988-24833-0022.flac,-9.55,0.85,7.71,0.7299,0.8276
+stress_-5_0_00,stress_-5_0,synth_radio_static,real:p225_425_1993-147149-0018.wav,-3.36,-4.82,6.44,0.4437,0.5583
+stress_-5_0_01,stress_-5_0,real_tactical:mad_combat_2-106849-A-47.wav,real:2803-154320-0011.flac,-2.49,-2.16,4.18,0.6106,0.7268
+stress_-5_0_02,stress_-5_0,synth_gunshot,real:5338-284437-0008.flac,-4.06,-3.43,12.27,0.6963,0.776
+op_0_5_00,op_0_5,synth_jet_flyby,real:p225_353_1988-147956-0021.wav,3.46,-2.23,8.31,0.6912,0.821
+op_0_5_01,op_0_5,synth_siren,real:5338-24640-0009.flac,4.4,4.46,10.7,0.8271,0.8637
+op_0_5_02,op_0_5,synth_siren,real:p225_089_1462-170138-0016.wav,1.93,-2.33,8.0,0.7274,0.8423
+op_5_10_00,op_5_10,synth_armored_vehicle,real:p225_216_174-168635-0007.wav,8.71,9.63,12.96,0.9513,0.9595
+op_5_10_01,op_5_10,synth_siren,real:1993-147149-0019.flac,6.1,-1.42,4.88,0.8109,0.9098
+op_5_10_02,op_5_10,real_tactical:audioset_tactical_helo_08.wav,real:7976-110124-0007.flac,6.97,19.14,18.64,0.8609,0.8673
+op_10_15_00,op_10_15,real_tactical:audioset_siren_4-111671-A-42.wav,synth_spk_90,14.98,11.71,15.55,0.9642,0.9743
+op_10_15_01,op_10_15,real_tactical:mad_combat_5-251963-A-47.wav,real:422-122949-0009.flac,11.52,12.28,15.42,0.9215,0.9343
+op_10_15_02,op_10_15,synth_armored_vehicle,real:p225_325_1919-142785-0057.wav,13.39,9.86,12.44,0.9586,0.9608

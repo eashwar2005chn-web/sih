@@ -76,7 +76,12 @@ def evaluate_balanced_scenarios(
             noisy,
             backend="CUDA" if engine.cuda_available else "CPU",
             enable_neural=True,
-            enable_nlms_post=True
+            # NLMS post-filter DISABLED. Phase 11B swept 9 configurations of the causal
+            # minimum-statistics post-filter and ALL of them degraded Output SNR (best: -0.92 dB);
+            # it is a confirmed dead end and is off everywhere else in the project. Leaving it
+            # True here silently applied a filter to any figure this script produced, which would
+            # not match the published numbers. See eval/DRDO_TARGETS_EVALUATION.md sec 9.5.
+            enable_nlms_post=False
         )
         enh = res["enhanced"]
         rtf = res["rtf"]

@@ -15,6 +15,7 @@ from tabulate import tabulate
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from data.real_dataset_loader import HybridRealDataset
+from data.real_dataset_loader import verify_eval_splits_frozen
 from model.causal_anc_net import CausalANCNet, CausalANCScaledNet, build_causal_anc_model
 from eval.metrics_common import evaluate_batch_metrics, aggregate_metric_records
 
@@ -104,6 +105,9 @@ def evaluate_model_on_split(model, device: str = "cuda"):
 
 
 def main():
+    # Guard: every published metric was measured on the frozen val/test file lists.
+    # Raises if they have drifted (e.g. a new data source leaked into an eval split).
+    verify_eval_splits_frozen()
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     # Load Baseline

@@ -171,17 +171,42 @@ def run_full_benchmark(
         "P95 Latency": f"{res_cpu_pt['p95_frame_ms']:.2f} ms",
         "RTF (Real-Time Factor)": f"{res_cpu_pt['rtf']:.4f}",
         "Est. Power": "28W - 45W",
-        "Role in DRDO Pipeline": "Audio I/O, Causal Framing & NLMS Post-Filter"
+        "Role in DRDO Pipeline": "Audio I/O & Causal Framing"
     })
 
     # 2. RTX 5060 CUDA FP16
+    # `torch.cuda.is_available()` alone is NOT sufficient: on this machine it returns True for
+    # an RTX 5060 (sm_120) while the installed torch build ships kernels only up to sm_90, so
+    # every CUDA op raises "no kernel image is available for execution on the device". Probe
+    # with a real kernel launch before claiming a GPU measurement -- same failure mode as the
+    # NPU fallback that previously emitted a fabricated latency figure.
+    _cuda_usable = False
     if torch.cuda.is_available():
+        try:
+            _p = torch.randn(32, 32, device="cuda")
+            _ = (_p @ _p).sum().item()
+            torch.cuda.synchronize()
+            _cuda_usable = True
+        except Exception as _exc:
+            print("\n" + "!" * 78, file=sys.stderr)
+            print("!! CUDA reports available but CANNOT EXECUTE KERNELS - NO GPU ROW WILL BE", file=sys.stderr)
+            print(f"!! REPORTED. {type(_exc).__name__}: {str(_exc).splitlines()[0]}", file=sys.stderr)
+            print(f"!! torch {torch.__version__} supports {torch.cuda.get_arch_list()}", file=sys.stderr)
+            print("!! Do NOT substitute an estimated or previously-recorded GPU number here.", file=sys.stderr)
+            print("!" * 78 + "\n", file=sys.stderr)
+
+    if _cuda_usable:
         gpu_name = torch.cuda.get_device_name(0)
         print(f"\n[2/4] Benchmarking NVIDIA RTX 5060 (CUDA FP16)...")
         res_gpu = benchmark_pytorch_device(model, "cuda", num_warmup=30, num_runs=100, use_fp16=True)
         results.append({
             "Hardware Target": f"NVIDIA RTX 5060 Laptop GPU",
-            "Execution Runtime": "CUDA / TensorRT (AMP FP16)",
+            # NOT TensorRT. This row is measured with plain PyTorch eager execution under
+            # torch.amp.autocast (see benchmark_pytorch_device above). TensorRT is not installed,
+            # no .engine/.plan artifact exists, and no TRT conversion is performed anywhere in
+            # this repository. The label previously read "CUDA / TensorRT (AMP FP16)", which
+            # claimed a runtime that was never used. Corrected 2026-08-30.
+            "Execution Runtime": "PyTorch eager CUDA (torch.amp autocast FP16) - NOT TensorRT",
             "Precision": "FP16",
             "Latency / Frame (ms)": f"{res_gpu['mean_frame_ms']:.2f} ms",
             "P95 Latency": f"{res_gpu['p95_frame_ms']:.2f} ms",
@@ -220,16 +245,25 @@ def run_full_benchmark(
             "Role in DRDO Pipeline": "Edge Tactical SoC / DSP Stand-In (Winning Story)"
         })
     else:
-        # Documented theoretical NPU projection based on OpenVINO NPU spec
+        # NPU benchmark did not run (compilation failed or device unavailable).
+        # NEVER substitute a projected/estimated latency here: a previous version of this
+        # script emitted a hardcoded "0.18 ms / RTF 0.0110" projection in this branch, which
+        # propagated into submission documents as if it were a measurement. Report the
+        # failure explicitly instead.
+        print("\n" + "!" * 78, file=sys.stderr)
+        print("!! NPU BENCHMARK FAILED - NO LATENCY NUMBER IS AVAILABLE FOR THIS TARGET.", file=sys.stderr)
+        print("!! The report row will read NOT MEASURED. Do NOT substitute an estimate,", file=sys.stderr)
+        print("!! a spec-sheet projection, or a number from any other device.", file=sys.stderr)
+        print("!" * 78 + "\n", file=sys.stderr)
         results.append({
             "Hardware Target": "Intel AI Boost NPU",
-            "Execution Runtime": "OpenVINO NPU Plugin (INT8 PTQ)",
-            "Precision": "INT8",
-            "Latency / Frame (ms)": "0.18 ms",
-            "P95 Latency": "0.24 ms",
-            "RTF (Real-Time Factor)": "0.0110",
-            "Est. Power": "< 2.5W (Ultra-Low Power)",
-            "Role in DRDO Pipeline": "Edge Tactical SoC / DSP Stand-In (Winning Story)"
+            "Execution Runtime": "OpenVINO NPU Plugin — COMPILATION FAILED",
+            "Precision": "n/a",
+            "Latency / Frame (ms)": "NOT MEASURED",
+            "P95 Latency": "NOT MEASURED",
+            "RTF (Real-Time Factor)": "NOT MEASURED",
+            "Est. Power": "n/a",
+            "Role in DRDO Pipeline": "Unavailable: NPU compiler rejects the GRU core (GRUSequence sequenceLengths must be Constant)"
         })
 
     # Print Table
@@ -253,10 +287,12 @@ def run_full_benchmark(
 ---
 
 ## Key Hardware Findings for DRDO Judging Panel:
-1. **Zero-Latency Jitter**: All hardware targets achieve frame processing latency far below the 16 ms causal audio frame hop budget ($\text{RTF} \ll 1.0$).
-2. **Intel NPU as Tactical Edge SoC**: The Intel AI Boost NPU running OpenVINO INT8 provides the lowest thermal/power footprint ($<2.5\text{W}$), directly validating the edge DSP/SoC deployability requested in PS 26052.
-3. **RTX 5060 Training Acceleration**: The RTX 5060 GPU with mixed precision (AMP FP16) allows complete model convergence and tactical acoustic calibration within minutes.
-4. **Intel Core Ultra 9 CPU Determinism**: The host CPU orchestrates zero-drop audio framing and real-time adaptive NLMS post-filtering with $<0.2\text{ms}$ overhead.
+1. **Zero-Latency Jitter**: All *successfully benchmarked* targets achieve frame processing latency far below the 16 ms causal audio frame hop budget ($\text{RTF} \ll 1.0$).
+2. **Intel CPU INT8 as the edge path**: The 1.46 MB INT8 OpenVINO IR runs on the Intel Core Ultra 9 CPU via the OpenVINO runtime, which is the genuine low-footprint deployment story for PS 26052.
+3. **RTX 5060 Training Acceleration**: The RTX 5060 GPU with mixed precision (AMP FP16) allows rapid model convergence.
+4. **NPU status**: Intel AI Boost NPU offload is **not currently working** — the NPU compiler rejects the model's GRU core. Any row above marked `NOT MEASURED` is a real failure, not a placeholder to be filled in with an estimate.
+
+> **Provenance rule for this report**: every number in the table above is emitted only from an actual timed run. If a target fails to compile or is unavailable, its row reads `NOT MEASURED`. Do not hand-edit projected values into this file.
 """
 
     with open(output_report_path, "w", encoding="utf-8") as f:

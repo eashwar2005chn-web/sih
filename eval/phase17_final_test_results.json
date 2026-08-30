@@ -1,0 +1,60 @@
+{
+  "checkpoint": "checkpoints/phase17_long_train/best_model.pt",
+  "epoch": 40,
+  "val_snr": 14.347080127447844,
+  "n_operational": 300,
+  "n_stress": 200,
+  "op_snr": 14.351,
+  "op_snr_ci": [
+    13.692,
+    15.009
+  ],
+  "op_pass_rate": 38.67,
+  "op_pass_ci": [
+    33.33,
+    44.29
+  ],
+  "op_stoi": 0.9212,
+  "op_pesq": 3.87,
+  "op_gain": 4.367,
+  "stress_snr": 7.445,
+  "stress_gain": 9.698,
+  "per_bucket": {
+    "Stress [-10, -5) dB": {
+      "snr": 5.864,
+      "stoi": 0.7504,
+      "n": 100
+    },
+    "Stress [-5, 0) dB": {
+      "snr": 9.026,
+      "stoi": 0.8185,
+      "n": 100
+    },
+    "Operational [0, 5) dB": {
+      "snr": 11.141,
+      "stoi": 0.8781,
+      "n": 100
+    },
+    "Operational [5, 10) dB": {
+      "snr": 15.118,
+      "stoi": 0.936,
+      "n": 100
+    },
+    "Operational [10, 15] dB": {
+      "snr": 16.793,
+      "stoi": 0.9495,
+      "n": 100
+    }
+  },
+  "baseline_reference": {
+    "op_snr": 12.75,
+    "op_sd": 5.35,
+    "op_pass": 28.0,
+    "op_stoi": 0.899,
+    "op_pesq": 3.69,
+    "stress_snr": 4.59,
+    "stress_gain": 6.84
+  },
+  "target_snr_met": false,
+  "target_pass_met": false
+}

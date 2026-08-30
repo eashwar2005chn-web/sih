@@ -31,7 +31,9 @@ class RealTimeANCEngine:
 
     def __init__(
         self,
-        checkpoint_path: str = "checkpoints/best_model.pt",
+        # Authoritative epoch-50 checkpoint (sha256 c0fed3f4...). Do NOT change to
+        # "checkpoints/best_model.pt" — that path holds a stale epoch-6 model.
+        checkpoint_path: str = "checkpoints/task4_full_run/best_model.pt",
         openvino_model_path: str = "export/openvino_int8/causal_anc_int8.xml",
         sample_rate: int = 16000,
         n_fft: int = 512,

@@ -1,0 +1,50 @@
+{
+  "clean_speech": {
+    "n_train": 2546,
+    "n_val": 346,
+    "n_test": 342,
+    "file_overlap_train_test": 0,
+    "file_overlap_train_val": 0,
+    "file_overlap_val_test": 0,
+    "speaker_overlap_train_test": 41,
+    "test_files_with_train_speaker_pct": 99.71,
+    "content_dupes_train_test": 65,
+    "content_hash_sampled_train": 400,
+    "content_hash_sampled_test": 342
+  },
+  "generic_noise": {
+    "n_train": 2286,
+    "n_val": 269,
+    "n_test": 275,
+    "file_overlap_train_test": 0,
+    "file_overlap_train_val": 0,
+    "file_overlap_val_test": 0,
+    "content_dupes_train_test": 39,
+    "content_hash_sampled_train": 400,
+    "content_hash_sampled_test": 275
+  },
+  "tactical_noise": {
+    "n_train": 201,
+    "n_val": 40,
+    "n_test": 34,
+    "file_overlap_train_test": 0,
+    "file_overlap_train_val": 0,
+    "file_overlap_val_test": 0,
+    "content_dupes_train_test": 0,
+    "content_hash_sampled_train": 201,
+    "content_hash_sampled_test": 34
+  },
+  "rirs": {
+    "n_train": 105,
+    "n_val": 11,
+    "n_test": 14,
+    "file_overlap_train_test": 0,
+    "file_overlap_train_val": 0,
+    "file_overlap_val_test": 0,
+    "content_dupes_train_test": 1,
+    "content_hash_sampled_train": 105,
+    "content_hash_sampled_test": 14
+  },
+  "gunshot_kaggle_train": 0,
+  "gunshot_kaggle_test": 2
+}

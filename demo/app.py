@@ -104,8 +104,13 @@ st.markdown("""
 
 @st.cache_resource
 def load_engine():
+    # Phase 15 (A.4 provenance fix): this previously pointed at "checkpoints/best_model.pt",
+    # which is an EPOCH-6 checkpoint (sha256 b80306d9...), NOT the epoch-50 model that every
+    # reported metric was produced from. The demo was therefore showing a materially
+    # under-trained model. Pinned to the authoritative checkpoint below.
+    #   sha256 c0fed3f445a4aa44835d4ca24025549a1e9fac8cbde66d1e8ca9e7407728273c
     return RealTimeANCEngine(
-        checkpoint_path="checkpoints/best_model.pt",
+        checkpoint_path="checkpoints/task4_full_run/best_model.pt",
         openvino_model_path="export/openvino_int8/causal_anc_int8.xml"
     )
 
@@ -206,7 +211,17 @@ backend_choice = st.sidebar.selectbox(
 )
 
 enable_neural = "Bypass" not in backend_choice
-enable_nlms_post = st.sidebar.checkbox("Enable Hybrid Adaptive NLMS Post-Filter (CPU)", value=True)
+enable_nlms_post = st.sidebar.checkbox(
+    "Enable Adaptive NLMS Post-Filter (CPU) — experimental, NOT quantitatively evaluated",
+    value=False,
+    help=(
+        "This is the NormalizedLMSFilter in model/adaptive_lms.py. It has never been scored in any "
+        "evaluation phase — no SNR/STOI/PESQ figure in any project report was produced with it enabled. "
+        "It is a separate technique from the causal minimum-statistics spectral-subtraction post-filter "
+        "that Phase 11B did evaluate and rule out (best case -0.92 dB); do not conflate the two. "
+        "Disabled by default because its effect on the reported metrics is unmeasured."
+    ),
+)
 
 # --- Acoustic Synthesis & Processing ---
 noise_raw = noise_gen.get_noise_by_type(noise_key_map[noise_type], duration_sec=len(clean_audio)/16000)
@@ -323,7 +338,8 @@ with p_col1:
     st.audio(audio_to_bytes(noisy_audio), format="audio/wav")
 
 with p_col2:
-    st.caption("🟢 Enhanced Tactical Voice (AI-ANC + NLMS Output)")
+    nlms_suffix = " + NLMS Post-Filter (experimental)" if enable_nlms_post else ""
+    st.caption(f"🟢 Enhanced Tactical Voice (AI-ANC{nlms_suffix})")
     st.audio(audio_to_bytes(enhanced_audio), format="audio/wav")
 
 with p_col3:
@@ -396,5 +412,5 @@ with h_col2:
     st.caption("Quantized INT8 Post-Training Compression, 0.008 RTF, direct stand-in for edge soldier SoC.")
 
 with h_col3:
-    st.markdown("##### ⚙️ Host & Post-Filter: Intel Core Ultra 9 CPU")
-    st.caption("Deterministic framing I/O + Real-time adaptive NLMS residual post-filtering (<0.2ms).")
+    st.markdown("##### ⚙️ Host I/O: Intel Core Ultra 9 CPU")
+    st.caption("Deterministic causal framing I/O. An adaptive NLMS residual post-filter is available as an experimental toggle above (off by default — never quantitatively evaluated; no reported metric uses it).")

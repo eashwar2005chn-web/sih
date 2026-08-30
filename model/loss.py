@@ -227,6 +227,116 @@ class HybridANCLoss(nn.Module):
         }
 
 
+class SNRLoss(nn.Module):
+    """
+    Scale-DEPENDENT SNR loss: the exact negative of the reported eval metric.
+
+    compute_snr() is 10*log10(||s||^2 / ||s_hat - s||^2). SI-SNR, which the existing
+    HybridANCLoss optimises, is scale-INVARIANT -- it projects out any constant gain error,
+    so the model is never asked to get its output level right. Measured consequence
+    (scripts/probe_scale_mismatch.py, Phase 17 model, val split): optimal per-utterance
+    rescale is alpha* = 0.918 on average (output ~8% hot) and recovers +1.06 dB. A single
+    global constant recovers only +0.06 dB, because the error is utterance-dependent --
+    so it cannot be fixed post-hoc, only learned.
+
+    The existing l_time_l1 and l_energy terms are scale-sensitive proxies; this term is the
+    objective itself.
+    """
+
+    def __init__(self, eps: float = 1e-8):
+        super().__init__()
+        self.eps = eps
+
+    def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        noise = pred - target
+        s_pow = torch.sum(target ** 2, dim=-1) + self.eps
+        n_pow = torch.sum(noise ** 2, dim=-1) + self.eps
+        return -10.0 * torch.log10(s_pow / n_pow)   # per-sample; caller reduces
+
+
+class ScaleAwareANCLoss(nn.Module):
+    """
+    HybridANCLoss + a direct scale-dependent SNR term + optional per-sample weighting by
+    input SNR.
+
+    lambda_snr    : weight on the direct SNR objective.
+    hard_weight   : per-sample weight ramps linearly from 1.0 at input SNR >= hi_db up to
+                    `hard_weight` at <= lo_db. Set to 1.0 to disable. Motivation: the
+                    aggregate mean is dragged down by the [0,5) dB bucket (11.14 dB) while
+                    the top two buckets already clear 15 dB.
+    """
+
+    def __init__(self, lambda_snr: float = 1.0, hard_weight: float = 1.0,
+                 lo_db: float = -10.0, hi_db: float = 5.0, **kw):
+        super().__init__()
+        self.base = HybridANCLoss(**kw)
+        self.snr_loss = SNRLoss()
+        self.lambda_snr = lambda_snr
+        self.hard_weight = hard_weight
+        self.lo_db = lo_db
+        self.hi_db = hi_db
+
+    def sample_weights(self, snr_db: Optional[torch.Tensor], n: int,
+                       device) -> torch.Tensor:
+        if snr_db is None or self.hard_weight == 1.0:
+            return torch.ones(n, device=device)
+        t = (self.hi_db - snr_db.to(device)) / (self.hi_db - self.lo_db)
+        t = torch.clamp(t, 0.0, 1.0)
+        return 1.0 + (self.hard_weight - 1.0) * t
+
+    def forward(self, pred_wav, target_wav, pred_real=None, pred_imag=None,
+                target_real=None, target_imag=None, snr_db=None):
+        out = self.base(pred_wav, target_wav, pred_real, pred_imag, target_real, target_imag)
+        per_sample_snr = self.snr_loss(pred_wav, target_wav)
+        w = self.sample_weights(snr_db, per_sample_snr.shape[0], per_sample_snr.device)
+        l_snr = torch.sum(w * per_sample_snr) / torch.sum(w)
+        out["snr_loss"] = l_snr
+        out["total_loss"] = out["total_loss"] + self.lambda_snr * l_snr
+        return out
+
+
+class MaskSupervisionLoss(nn.Module):
+    """
+    Direct supervision of the complex ratio mask against its closed-form ideal.
+
+    Every other loss in this project supervises the SUMMED result -- a waveform or a
+    spectrogram -- so the gradient reaching any individual time-frequency bin is heavily
+    diluted. But the ideal complex ratio mask M* = S/Y is available in closed form (it is
+    exactly what every oracle probe in eval/ computes), which means estimation can be
+    supervised per-bin instead of through a downstream proxy.
+
+    That matters because the measured problem IS estimation accuracy:
+    scripts/probe_representational_vs_estimation.py showed this architecture can represent
+    masks worth 27.57 dB while the trained model realises 10.39 dB.
+
+    Two details that matter:
+      * M* is ill-conditioned wherever |Y| ~ 0 (dividing by near-silence). Bins are
+        therefore weighted by |Y|, so supervision concentrates where the mask actually
+        moves energy and near-silent bins cannot dominate the gradient.
+      * The target is clamped to the tanh head's REACHABLE set (-bound, bound). Supervising
+        toward values the head cannot emit would just inject a constant error.
+    """
+
+    def __init__(self, bound: float = 0.999, eps: float = 1e-8, weight_power: float = 1.0):
+        super().__init__()
+        self.bound = bound
+        self.eps = eps
+        self.weight_power = weight_power
+
+    def ideal_mask(self, noisy_r, noisy_i, clean_r, clean_i):
+        den = noisy_r ** 2 + noisy_i ** 2 + self.eps
+        Mr = (clean_r * noisy_r + clean_i * noisy_i) / den
+        Mi = (clean_i * noisy_r - clean_r * noisy_i) / den
+        return Mr.clamp(-self.bound, self.bound), Mi.clamp(-self.bound, self.bound)
+
+    def forward(self, mask_r, mask_i, noisy_r, noisy_i, clean_r, clean_i):
+        Mr, Mi = self.ideal_mask(noisy_r, noisy_i, clean_r, clean_i)
+        w = torch.sqrt(noisy_r ** 2 + noisy_i ** 2 + self.eps) ** self.weight_power
+        w = w / (w.mean() + self.eps)
+        err = (mask_r - Mr).abs() + (mask_i - Mi).abs()
+        return (w * err).mean()
+
+
 # --- Evaluation Metrics ---
 
 def compute_snr(clean: np.ndarray, noisy_or_enhanced: np.ndarray) -> float:
@@ -254,9 +364,28 @@ def compute_stoi(clean: np.ndarray, enhanced: np.ndarray, sr: int = 16000) -> fl
     if HAS_PYSTOI:
         try:
             return float(pystoi.stoi(clean, enhanced, sr, extended=False))
-        except Exception:
-            pass
-    # Correlation-based fallback approximation if pystoi fails on edge silence
+        except Exception as exc:
+            # BUG-CLASS GUARD (Phase 15 / Section A.5): this used to `pass` silently and
+            # fall through to the correlation proxy below, returning a NON-STOI number
+            # indistinguishable from a real STOI value in every downstream report. That is
+            # the same silent-substitution pattern that produced the fabricated NPU latency
+            # figure. It must be loud. Audited over the full N=500 test set: this path fired
+            # 0/1000 times, so no reported STOI value is affected.
+            raise RuntimeError(
+                f"pystoi.stoi() failed and NO substitute value will be returned: {type(exc).__name__}: {exc}. "
+                "Fix the input or explicitly call _stoi_correlation_proxy() and label the result as a proxy."
+            ) from exc
+    raise RuntimeError(
+        "pystoi is not installed; refusing to silently substitute a correlation proxy for STOI. "
+        "Install pystoi, or call _stoi_correlation_proxy() explicitly and label the result as a proxy."
+    )
+
+
+def _stoi_correlation_proxy(clean: np.ndarray, enhanced: np.ndarray) -> float:
+    """
+    Correlation-based approximation of intelligibility. This is NOT STOI and must never be
+    reported as STOI. Retained only so a caller can opt in deliberately and label it.
+    """
     r = np.corrcoef(clean, enhanced)[0, 1]
     return float(np.clip(0.5 * (r + 1.0), 0.0, 1.0))
 
@@ -274,7 +403,10 @@ def compute_pesq(clean: np.ndarray, enhanced: np.ndarray, sr: int = 16000) -> fl
     """
     Compute PESQ (Perceptual Evaluation of Speech Quality, ITU-T P.862 / P.862.2).
     - If `pesq` package is installed: computes exact ITU-T P.862 wideband (16kHz) or narrowband (8kHz).
-    - Fallback: computes psychoacoustic Bark spectral distortion metric calibrated to ITU-T P.862.
+    - Fallback: computes a heuristic psychoacoustic Bark spectral distortion proxy, hand-tuned to sit
+      on the PESQ 1.0-4.5 scale. It is NOT empirically calibrated/regressed against real ITU-T P.862
+      scores (no reference-PESQ ground truth was available in this environment to fit against) and
+      should not be quoted as equivalent to or comparable with real PESQ.
     """
     global _PESQ_LOGGED
     min_len = min(len(clean), len(enhanced))
@@ -298,16 +430,23 @@ def compute_pesq(clean: np.ndarray, enhanced: np.ndarray, sr: int = 16000) -> fl
         _PESQ_LOGGED = True
 
     # 2. Psychoacoustic spectral envelope and Bark-band distortion fallback
-    stoi_val = compute_stoi(c, e, sr=sr)
-    si_snr_val = compute_si_snr(c, e)
-
     n_fft = 512
     hop = 256
     w = np.hanning(512).astype(np.float32)
 
     n_frames = (min_len - n_fft) // hop
     if n_frames <= 0:
-        return 2.5
+        # BUG-CLASS GUARD (Phase 15 / Section A.5): this used to `return 2.5` -- a hardcoded
+        # value sitting exactly on the project's PESQ pass threshold (>2.50), silently
+        # emitted for any too-short signal. Audited over the full N=500 test set: fired
+        # 0/1000 times, so no reported PESQ value is affected. Now it fails loudly.
+        raise ValueError(
+            f"Signal too short for PESQ computation (min_len={min_len} < n_fft={n_fft} + hop={hop}); "
+            "refusing to substitute a placeholder score."
+        )
+
+    stoi_val = compute_stoi(c, e, sr=sr)
+    si_snr_val = compute_si_snr(c, e)
 
     spec_c = np.abs(np.array([np.fft.rfft(c[i*hop:i*hop+n_fft] * w) for i in range(n_frames)])) + 1e-7
     spec_e = np.abs(np.array([np.fft.rfft(e[i*hop:i*hop+n_fft] * w) for i in range(n_frames)])) + 1e-7
@@ -315,7 +454,7 @@ def compute_pesq(clean: np.ndarray, enhanced: np.ndarray, sr: int = 16000) -> fl
     log_diff = np.abs(np.log(spec_c) - np.log(spec_e))
     pmsqe_val = float(np.mean(log_diff))
 
-    # Calibrated mapping to PESQ scale [1.0, 4.5]
+    # Uncalibrated heuristic mapping onto the PESQ [1.0, 4.5] scale (not fit to real PESQ data)
     pesq_est = 1.0 + 2.8 * (stoi_val ** 1.5) + 0.04 * np.clip(si_snr_val, -10, 25) - 0.25 * np.clip(pmsqe_val, 0, 4)
     return float(np.clip(pesq_est, 1.0, 4.5))
 

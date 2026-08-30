@@ -1,0 +1,13 @@
+{
+  "split_function": "md5(filepath) % 100 -> train <80, val 80-90, test >=90",
+  "n_speakers": {
+    "train": 292,
+    "val": 41,
+    "test": 41
+  },
+  "test_speakers_seen_in_train": 41,
+  "test_speakers_unseen_in_train": 0,
+  "val_speakers_seen_in_train": 41,
+  "unseen_test_speakers": [],
+  "speaker_disjoint": false
+}

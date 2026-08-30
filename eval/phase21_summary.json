@@ -1,0 +1,16 @@
+{
+  "A_control": {
+    "arm": "A_control",
+    "lambda_mask": 0.0,
+    "best_epoch": 28,
+    "best_val_snr": 14.1721,
+    "best_val_stoi": 0.9064
+  },
+  "B_mask_supervision": {
+    "arm": "B_mask_supervision",
+    "lambda_mask": 6.27,
+    "best_epoch": 26,
+    "best_val_snr": 14.2667,
+    "best_val_stoi": 0.9048
+  }
+}
