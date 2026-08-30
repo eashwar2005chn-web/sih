@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DRDO Voice Logger</string>
+    <string name="notification_channel_name">Continuous Recording</string>
+    <string name="notification_channel_desc">Shown whenever the microphone is live. Required by Android and deliberately not dismissible \u2014 recording state must always be visible.</string>
+</resources>
