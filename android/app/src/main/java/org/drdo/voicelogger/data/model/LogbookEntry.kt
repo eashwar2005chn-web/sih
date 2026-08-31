@@ -12,7 +12,11 @@ data class LogbookEntry(
     val durationSec: Double,
     val filePath: String,            // Path to encrypted audio file in app-private storage
     val sizeBytes: Long,
-    val codec: String = "Opus_24kbps",
+    // The app writes raw little-endian 16-bit PCM. This field used to default to
+    // "Opus_24kbps", which was never true - no Opus encoder exists anywhere in the codebase -
+    // and it was uploaded to the server on every chunk as if it were fact.
+    // At 16 kHz mono this is 32 KB/s, i.e. ~115 MB per hour of capture.
+    val codec: String = "PCM_S16LE",
     val sampleRate: Int = 16000,
     val deviceId: String = "ANDROID_FIELD_UNIT_01",
     var syncState: String = "local",  // "local" | "queued" | "uploading" | "synced" | "failed"

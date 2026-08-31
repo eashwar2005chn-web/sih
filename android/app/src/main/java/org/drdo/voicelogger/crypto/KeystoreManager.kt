@@ -23,17 +23,35 @@ object KeystoreManager {
     const val PRIMARY_KEY_ALIAS = "VoiceLoggerPrimaryKey"
     const val PROTECTED_KEY_ALIAS = "VoiceLoggerProtectedKey"
 
-    init {
-        getOrCreateSecretKey(PRIMARY_KEY_ALIAS)
-        getOrCreateSecretKey(PROTECTED_KEY_ALIAS)
-    }
+    // There is deliberately NO init block here.
+    //
+    // This object previously generated both keys from a static initialiser. Anything thrown
+    // during class initialisation surfaces as ExceptionInInitializerError - an Error, at the
+    // first touch of the class rather than at the call site - so a transient Keystore problem
+    // took down the capture service before it could record anything, and no catch(Exception)
+    // anywhere could have stopped it. Keys are created on first use instead, which is when
+    // they are actually needed and where a failure can be handled.
 
     @Synchronized
     private fun getOrCreateSecretKey(alias: String): SecretKey {
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
         if (keyStore.containsAlias(alias)) {
-            val entry = keyStore.getEntry(alias, null) as KeyStore.SecretKeyEntry
-            return entry.secretKey
+            // getEntry can fail on an entry that exists but is unusable - key material
+            // invalidated by a lock-screen change, or a corrupted keystore. Recover by
+            // regenerating rather than throwing: audio encrypted under the lost key is
+            // already unrecoverable, so this destroys nothing that was still readable, and
+            // refusing to proceed would stop the device recording entirely.
+            val existing = runCatching {
+                (keyStore.getEntry(alias, null) as? KeyStore.SecretKeyEntry)?.secretKey
+            }.getOrNull()
+            if (existing != null) return existing
+
+            android.util.Log.e(
+                "KeystoreManager",
+                "Key '" + alias + "' exists but could not be loaded; regenerating. " +
+                        "Recordings encrypted under the previous key can no longer be decrypted."
+            )
+            runCatching { keyStore.deleteEntry(alias) }
         }
 
         val keyGenerator = KeyGenerator.getInstance(ALGORITHM, ANDROID_KEYSTORE)

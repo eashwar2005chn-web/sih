@@ -1,210 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:fillViewport="true">
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:fitsSystemWindows="true">
 
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
-
-        <!-- Header -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="DRDO PS 26052"
-            android:textColor="#475467"
-            android:textSize="12sp"
-            android:letterSpacing="0.08"
-            android:textStyle="bold" />
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="18dp"
+        android:paddingBottom="14dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="24/7 Tactical Voice Logger"
-            android:textColor="#101828"
-            android:textSize="22sp"
+            android:text="@string/ps_line"
+            android:textColor="@color/text_muted"
+            android:textSize="11sp"
             android:textStyle="bold"
-            android:layout_marginTop="4dp" />
+            android:letterSpacing="0.10" />
 
-        <!-- SOS Emergency Active Banner -->
-        <LinearLayout
-            android:id="@+id/sosBanner"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/txtScreenTitle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="#FEF2F2"
-            android:padding="16dp"
-            android:layout_marginTop="16dp"
-            android:gravity="center_vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="🚨 SOS ALERT ACTIVE — RECORDING UNBROKEN"
-                android:textColor="#DC2626"
-                android:textStyle="bold"
-                android:textSize="13sp" />
-
-            <Button
-                android:id="@+id/btnStandDownSos"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Stand Down"
-                android:textColor="#DC2626"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <!-- Status Card -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="14dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="#F7F8FA">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="SYSTEM LOGGING STATUS"
-                    android:textColor="#98A2B3"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.05" />
-
-                <TextView
-                    android:id="@+id/txtServiceStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🟢 24/7 Foreground Service Active"
-                    android:textColor="#059669"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="8dp" />
-
-                <TextView
-                    android:id="@+id/txtQueueCount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0 entries queued for sync"
-                    android:textColor="#475467"
-                    android:textSize="13sp"
-                    android:layout_marginTop="4dp" />
-
-                <Button
-                    android:id="@+id/btnToggleService"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Pause Service"
-                    android:backgroundTint="#2563EB"
-                    android:layout_marginTop="12dp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- SOS Emergency Control -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="14dp"
-            app:cardElevation="3dp"
-            app:cardBackgroundColor="#FEF2F2">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp"
-                android:gravity="center">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="EMERGENCY DISPATCH"
-                    android:textColor="#DC2626"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.05" />
-
-                <Button
-                    android:id="@+id/btnSosEmergency"
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:text="SOS"
-                    android:textSize="26sp"
-                    android:textStyle="bold"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#DC2626"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="12dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Press and hold 1 second to dispatch emergency alert"
-                    android:textColor="#475467"
-                    android:textSize="12sp"
-                    android:textAlignment="center" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Logbook Summary Card -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="14dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="#F7F8FA">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="HOURLY LOGBOOK"
-                    android:textColor="#98A2B3"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.05" />
-
-                <TextView
-                    android:id="@+id/txtLogbookCount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0 Total Logbook Entries"
-                    android:textColor="#101828"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="8dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="SHA-256 Hash Chain: Active and Validated"
-                    android:textColor="#059669"
-                    android:textSize="12sp"
-                    android:layout_marginTop="4dp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
+            android:text="@string/app_subtitle"
+            android:textColor="@color/text_primary"
+            android:textSize="21sp"
+            android:textStyle="bold"
+            android:layout_marginTop="2dp" />
     </LinearLayout>
-</ScrollView>
+
+    <!-- SOS banner, hoisted to activity level so it stays visible on every tab -->
+    <LinearLayout
+        android:id="@+id/sosBanner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/danger_bg"
+        android:paddingStart="20dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/sos_active_banner"
+            android:textColor="@color/danger"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:letterSpacing="0.03" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStandDownSos"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/stand_down"
+            android:textColor="@color/danger"
+            android:textSize="12sp"
+            android:minWidth="0dp" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/border" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/navHost"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/border" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        app:elevation="0dp"
+        app:labelVisibilityMode="labeled"
+        app:itemIconTint="@color/nav_item_tint"
+        app:itemTextColor="@color/nav_item_tint"
+        app:itemActiveIndicatorStyle="@style/NavIndicator"
+        app:menu="@menu/bottom_nav" />
+</LinearLayout>

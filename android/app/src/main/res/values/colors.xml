@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DRDO Voice Logger - white minimalist palette with blue as the primary identity.
+  Blue carries interaction (actions, active states, focus). Red is reserved exclusively
+  for SOS. Colour never used decoratively.
+-->
+<resources>
+    <color name="white">#FFFFFFFF</color>
+    <color name="surface">#FFF8FAFC</color>
+    <color name="surface_raised">#FFFFFFFF</color>
+    <color name="border">#FFE2E8F0</color>
+    <color name="border_strong">#FFCBD5E1</color>
+
+    <color name="text_primary">#FF0F172A</color>
+    <color name="text_secondary">#FF475569</color>
+    <color name="text_muted">#FF94A3B8</color>
+
+    <color name="blue_600">#FF2563EB</color>
+    <color name="blue_500">#FF3B82F6</color>
+    <color name="blue_100">#FFDBEAFE</color>
+    <color name="blue_50">#FFEFF6FF</color>
+
+    <color name="success">#FF059669</color>
+    <color name="warn">#FFD97706</color>
+    <color name="danger">#FFDC2626</color>
+
+    <color name="danger_bg">#FFFEF2F2</color>
+    <color name="success_bg">#FFECFDF5</color>
+    <color name="warn_bg">#FFFFFBEB</color>
+    <color name="scrim">#14000000</color>
+
+    <color name="ic_launcher_background">#FF2563EB</color>
+</resources>

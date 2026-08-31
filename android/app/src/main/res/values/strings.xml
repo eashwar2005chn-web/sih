@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DRDO Voice Logger</string>
+    <string name="notification_channel_name">Continuous Recording</string>
+    <string name="notification_channel_desc">Shown whenever the microphone is live. Required by Android and deliberately not dismissible — recording state must always be visible.</string>
+
+    <string name="nav_dashboard">Status</string>
+    <string name="nav_logbook">Logbook</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="ps_line">DRDO PS 26052</string>
+    <string name="app_subtitle">24/7 Tactical Voice Logger</string>
+
+    <!-- Dashboard -->
+    <string name="capture_status">CAPTURE</string>
+    <string name="input_level">INPUT LEVEL</string>
+    <string name="current_segment">CURRENT SEGMENT</string>
+    <string name="emergency">EMERGENCY</string>
+    <string name="sos_hint">Press and hold for 1 second to dispatch</string>
+    <string name="stand_down">Stand down</string>
+    <string name="sos_active_banner">SOS ACTIVE — recording unbroken</string>
+
+    <!-- Logbook -->
+    <string name="logbook_title">Logbook</string>
+    <string name="delete_all">Delete all</string>
+    <string name="verify_chain">Verify chain</string>
+    <string name="empty_logbook">No entries yet</string>
+    <string name="empty_logbook_hint">Recordings appear here when the first segment completes.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="storage_section">STORAGE</string>
+    <string name="cloud_section">CLOUD SYNC</string>
+    <string name="capture_section">CAPTURE</string>
+    <string name="danger_section">DANGER ZONE</string>
+    <string name="change_folder">Change folder</string>
+    <string name="use_internal">Use internal</string>
+    <string name="save_endpoint">Save</string>
+    <string name="test_connection">Test</string>
+    <string name="sync_now">Sync now</string>
+</resources>

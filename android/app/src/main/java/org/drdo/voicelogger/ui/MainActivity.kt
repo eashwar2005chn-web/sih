@@ -5,66 +5,125 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.view.MotionEvent
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import org.drdo.voicelogger.data.db.AppDatabase
+import androidx.fragment.app.Fragment
+import org.drdo.voicelogger.R
 import org.drdo.voicelogger.databinding.ActivityMainBinding
 import org.drdo.voicelogger.service.VoiceLoggerService
+import org.drdo.voicelogger.sync.SyncScheduler
 
 /**
- * Tactical Light-Minimalist UI for DRDO 24/7 Voice Logger.
- * Minimal, clean white theme (#ffffff ground, 8px grid, Inter typography).
- * Features Status Dashboard, SOS Emergency Button (800ms hold), Logbook timeline, and Health screen.
+ * Single-activity shell: header, SOS banner, three tabs.
+ *
+ * The SOS banner lives here rather than inside the dashboard so it stays on screen while the
+ * operator is on any tab. An emergency that scrolls out of view is not an emergency indicator.
  */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var db: AppDatabase
 
-    private var sosPressStartTime = 0L
-    private val PERMISSION_REQUEST_CODE = 101
+    private val permissionRequest = 101
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate()
+        super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        db = AppDatabase.getDatabase(this)
+        binding.bottomNav.setOnItemSelectedListener { item ->
+            val f: Fragment = when (item.itemId) {
+                R.id.nav_logbook -> LogbookFragment()
+                R.id.nav_settings -> SettingsFragment()
+                else -> DashboardFragment()
+            }
+            val title = when (item.itemId) {
+                R.id.nav_logbook -> getString(R.string.logbook_title)
+                R.id.nav_settings -> getString(R.string.settings_title)
+                else -> getString(R.string.app_subtitle)
+            }
+            binding.txtScreenTitle.text = title
+            supportFragmentManager.beginTransaction()
+                .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
+                .replace(binding.navHost.id, f)
+                .commit()
+            true
+        }
+
+        if (savedInstanceState == null) {
+            binding.bottomNav.selectedItemId = R.id.nav_dashboard
+        }
+
+        binding.btnStandDownSos.setOnClickListener {
+            startService(Intent(this, VoiceLoggerService::class.java).apply {
+                action = VoiceLoggerService.ACTION_STAND_DOWN_SOS
+            })
+            setSosVisible(false)
+        }
 
         checkAndRequestPermissions()
-        setupUIHandlers()
-        observeData()
+
+        // Re-assert the standing upload schedule on every launch. KEEP policy means this is a
+        // no-op when it is already scheduled, and it recovers the schedule if the app was
+        // force-stopped (which cancels WorkManager jobs).
+        SyncScheduler.ensurePeriodic(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setSosVisible(VoiceLoggerService.sosActive)
+    }
+
+    fun setSosVisible(visible: Boolean) {
+        val v = binding.sosBanner
+        if (visible && v.visibility != View.VISIBLE) {
+            v.alpha = 0f
+            v.visibility = View.VISIBLE
+            v.animate().alpha(1f).setDuration(180).start()
+        } else if (!visible && v.visibility == View.VISIBLE) {
+            v.animate().alpha(0f).setDuration(140).withEndAction {
+                v.visibility = View.GONE
+            }.start()
+        }
     }
 
     private fun checkAndRequestPermissions() {
-        val permissions = mutableListOf(
-            Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        )
+        val wanted = mutableListOf(Manifest.permission.RECORD_AUDIO)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+            wanted.add(Manifest.permission.POST_NOTIFICATIONS)
         }
-
-        val missing = permissions.filter {
+        val missing = wanted.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
-
         if (missing.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, missing.toTypedArray(), PERMISSION_REQUEST_CODE)
+            ActivityCompat.requestPermissions(this, missing.toTypedArray(), permissionRequest)
         } else {
             startLoggingService()
         }
     }
 
-    private fun startLoggingService() {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode != permissionRequest) return
+        // Only start capture if RECORD_AUDIO was actually granted. Starting a microphone
+        // foreground service without it throws SecurityException on API 34+.
+        val micIdx = permissions.indexOf(Manifest.permission.RECORD_AUDIO)
+        val micOk = micIdx < 0 || grantResults.getOrNull(micIdx) == PackageManager.PERMISSION_GRANTED
+        if (micOk) startLoggingService()
+    }
+
+    fun startLoggingService() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            checkAndRequestPermissions()
+            return
+        }
         val intent = Intent(this, VoiceLoggerService::class.java).apply {
             action = VoiceLoggerService.ACTION_START
         }
@@ -72,87 +131,6 @@ class MainActivity : AppCompatActivity() {
             startForegroundService(intent)
         } else {
             startService(intent)
-        }
-    }
-
-    private fun setupUIHandlers() {
-        // Service Toggle Button
-        binding.btnToggleService.setOnClickListener {
-            if (VoiceLoggerService.isServiceRunning) {
-                val intent = Intent(this, VoiceLoggerService::class.java).apply {
-                    action = VoiceLoggerService.ACTION_STOP
-                }
-                startService(intent)
-                binding.btnToggleService.text = "Start 24/7 Service"
-            } else {
-                startLoggingService()
-                binding.btnToggleService.text = "Pause Service"
-            }
-        }
-
-        // SOS Emergency Button — Press and Hold ~800ms
-        binding.btnSosEmergency.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    sosPressStartTime = System.currentTimeMillis()
-                    binding.btnSosEmergency.animate().scaleX(0.95f).scaleY(0.95f).setDuration(150).start()
-                    true
-                }
-                MotionEvent.ACTION_UP -> {
-                    val duration = System.currentTimeMillis() - sosPressStartTime
-                    binding.btnSosEmergency.animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).start()
-                    if (duration >= 800) {
-                        triggerSosAlert()
-                    } else {
-                        Toast.makeText(this, "Press and hold SOS button for 1 second to confirm alert.", Toast.LENGTH_SHORT).show()
-                    }
-                    true
-                }
-                MotionEvent.ACTION_CANCEL -> {
-                    binding.btnSosEmergency.animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).start()
-                    true
-                }
-                else -> false
-            }
-        }
-
-        binding.btnStandDownSos.setOnClickListener {
-            val intent = Intent(this, VoiceLoggerService::class.java).apply {
-                action = VoiceLoggerService.ACTION_STAND_DOWN_SOS
-            }
-            startService(intent)
-            binding.sosBanner.visibility = View.GONE
-        }
-    }
-
-    private fun triggerSosAlert() {
-        val intent = Intent(this, VoiceLoggerService::class.java).apply {
-            action = VoiceLoggerService.ACTION_TRIGGER_SOS
-        }
-        startService(intent)
-
-        binding.sosBanner.visibility = View.VISIBLE
-        Toast.makeText(this, "🚨 EMERGENCY SOS DISPATCHED — Recording Unbroken", Toast.LENGTH_LONG).show()
-    }
-
-    private fun observeData() {
-        lifecycleScope.launch {
-            db.logbookEntryDao().getUnsyncedCountFlow().collectLatest { count ->
-                binding.txtQueueCount.text = "$count entries queued for sync"
-            }
-        }
-
-        lifecycleScope.launch {
-            db.logbookEntryDao().getAllEntriesFlow().collectLatest { entries ->
-                binding.txtLogbookCount.text = "${entries.size} Total Logbook Entries"
-            }
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            startLoggingService()
         }
     }
 }

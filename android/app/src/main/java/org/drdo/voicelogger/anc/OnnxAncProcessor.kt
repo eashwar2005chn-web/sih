@@ -76,9 +76,17 @@ class OnnxAncProcessor(private val context: Context) {
                 initFailureReason = "Model asset causal_anc_model.onnx not found in assets."
                 android.util.Log.e("ANC", initFailureReason!!)
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
+            // Throwable, NOT Exception. Loading libonnxruntime.so can fail with
+            // UnsatisfiedLinkError or NoClassDefFoundError, which are Errors and would sail
+            // straight past a catch(Exception) - out of this constructor, out of the service's
+            // onCreate, and into a START_STICKY restart loop that the user sees as
+            // "DRDO Voice Logger keeps stopping" with no recording happening at all.
+            // Noise cancellation is an enhancement; capture is the duty. Losing the first must
+            // never cost the second.
             isInitialized = false
-            initFailureReason = "ONNX Session Init Error: ${e.message}"
+            initFailureReason = "ONNX session init failed: " + e.javaClass.simpleName +
+                    ": " + (e.message ?: "no detail")
             android.util.Log.e("ANC", initFailureReason!!, e)
         }
     }
@@ -219,13 +227,15 @@ class OnnxAncProcessor(private val context: Context) {
                 failureReason = null
             )
 
-        } catch (e: Exception) {
-            android.util.Log.e("ANC", "ONNX Inference Exception: ${e.message}", e)
+        } catch (e: Throwable) {
+            // Same reasoning as initOnnxSession: a native-side failure here must degrade to
+            // storing the unprocessed audio, never take the capture service down.
+            android.util.Log.e("ANC", "ONNX inference failed: " + e.message, e)
             return AncResult(
                 enhancedPcm = inputPcm.clone(),
                 levelReductionDb = null,
                 processed = false,
-                failureReason = "Inference Exception: ${e.message}"
+                failureReason = e.javaClass.simpleName + ": " + (e.message ?: "no detail")
             )
         }
     }
