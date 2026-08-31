@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Only the exports cache directory is shared. The encrypted segments themselves are NEVER
+  exposed through the provider: sharing must hand out a decrypted copy, never a handle to the
+  stored ciphertext that the hash chain is computed over.
+-->
+<paths>
+    <cache-path name="exports" path="exports/" />
+</paths>

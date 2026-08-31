@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:scrollbars="none"
+    android:clipToPadding="false"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- ============ STORAGE ============ -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <TextView style="@style/SectionLabel"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="@string/storage_section" />
+
+                <TextView
+                    android:id="@+id/txtStorageCurrent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Internal storage"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
+
+                <TextView
+                    android:id="@+id/txtStorageUsage"
+                    style="@style/StatCaption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="--" />
+
+                <TextView
+                    style="@style/StatCaption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:textColor="@color/text_muted"
+                    android:text="New segments go to the chosen folder. Existing recordings stay where they were written, and remain playable." />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="12dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPickFolder"
+                        style="@style/PrimaryButton"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        app:icon="@drawable/ic_folder"
+                        app:iconSize="17dp"
+                        android:text="@string/change_folder" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnUseInternal"
+                        style="@style/OutlineButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:text="@string/use_internal" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ============ CLOUD ============ -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <TextView style="@style/SectionLabel"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="@string/cloud_section" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilEndpoint"
+                    style="@style/FieldBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Upload base URL"
+                    app:startIconDrawable="@drawable/ic_cloud"
+                    app:helperTextEnabled="true"
+                    app:helperText="Chunks are POSTed to {base}/recordings/{id}/chunk">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editEndpoint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textUri"
+                        android:maxLines="1"
+                        android:textSize="14sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSaveEndpoint"
+                        style="@style/PrimaryButton"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="@string/save_endpoint" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnTestEndpoint"
+                        style="@style/OutlineButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:text="@string/test_connection" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtEndpointResult"
+                    style="@style/Mono"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:text="" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swSyncEnabled"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Upload when connected"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_primary" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swUnmetered"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Wi-Fi only"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_primary" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swDeleteAfterSync"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Delete local audio after upload"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_primary" />
+
+                <TextView
+                    style="@style/StatCaption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/text_muted"
+                    android:text="Applies to NORMAL entries only. SOS and protected recordings are always kept on the device. Removing local audio makes an upload unverifiable afterwards." />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ============ CAPTURE ============ -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <TextView style="@style/SectionLabel"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="@string/capture_section" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/FieldBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Logbook segment length (minutes)"
+                    app:helperTextEnabled="true"
+                    app:helperText="Takes effect the next time capture starts">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editSegmentMinutes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLines="1"
+                        android:textSize="14sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/FieldBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:hint="Device ID">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editDeviceId"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textSize="14sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSaveCapture"
+                    style="@style/PrimaryButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Save capture settings" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ============ DANGER ZONE ============ -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:strokeColor="@color/danger"
+            app:cardBackgroundColor="@color/danger_bg">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <TextView style="@style/SectionLabel"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textColor="@color/danger"
+                    android:text="@string/danger_section" />
+
+                <TextView
+                    style="@style/StatCaption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Deleting recordings is permanent. Each deletion is written to the audit trail so the hash chain stays verifiable." />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPurgeAll"
+                    style="@style/DangerButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    app:icon="@drawable/ic_delete"
+                    app:iconSize="17dp"
+                    app:iconTint="@color/danger"
+                    android:text="Delete all recordings" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/txtBuildInfo"
+            style="@style/Mono"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"
+            android:textAlignment="center"
+            android:text="" />
+    </LinearLayout>
+</ScrollView>

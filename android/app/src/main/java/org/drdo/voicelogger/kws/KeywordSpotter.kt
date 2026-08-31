@@ -55,9 +55,11 @@ class KeywordSpotter(
             } else {
                 android.util.Log.e("KWS", "KWS Engine Initialization Failed: Model asset kws_model.onnx not found!")
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
+            // Throwable for the same reason as OnnxAncProcessor: a native loader Error here
+            // would escape the constructor and kill the capture service.
             isInitialized = false
-            android.util.Log.e("KWS", "KWS Engine Initialization Error: ${e.message}", e)
+            android.util.Log.e("KWS", "KWS engine init failed: " + e.message, e)
         }
     }
 

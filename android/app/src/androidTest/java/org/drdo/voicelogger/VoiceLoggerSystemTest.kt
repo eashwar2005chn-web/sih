@@ -40,8 +40,20 @@ class VoiceLoggerSystemTest {
         assertTrue("Hashes should be distinct", hash1 != hash2)
 
         // Verify chain integrity
-        val isSeg2Valid = HashChainManager.verifyEntryHash(segment2Bytes, prevHash = hash1, expectedHash = hash2)
+        val isSeg2Valid = HashChainManager.verifyEntryHash(segment2Bytes, prevSha256 = hash1, expectedSha256 = hash2)
         assertTrue("Segment 2 chained hash link must be valid", isSeg2Valid)
+
+        // Negative control. A verifier that only ever returns true would pass the assertion
+        // above, so check that tampering with the audio and with the link are both detected.
+        val tampered = segment2Bytes.copyOf().also { it[0] = 99 }
+        assertFalse(
+            "Modified audio must fail verification",
+            HashChainManager.verifyEntryHash(tampered, prevSha256 = hash1, expectedSha256 = hash2)
+        )
+        assertFalse(
+            "A wrong predecessor link must fail verification",
+            HashChainManager.verifyEntryHash(segment2Bytes, prevSha256 = prevHash, expectedSha256 = hash2)
+        )
     }
 
     @Test

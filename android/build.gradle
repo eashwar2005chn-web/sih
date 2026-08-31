@@ -21,3 +21,14 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+// Build output lives OUTSIDE OneDrive. The project directory is inside a synced OneDrive
+// folder, and OneDrive holds files in app/build open while syncing them, which makes Gradle
+// fail intermittently with "Unable to delete directory ... Failed to delete some children".
+// Those failures are easy to miss because they are IOExceptions, not compile errors, so a
+// stale APK gets installed and the source you just edited appears to have no effect.
+// Build artifacts are regenerable and should never have been synced in the first place.
+def outDir = System.getenv('ANC_BUILD_DIR') ?: 'C:/Users/eashw/devtools/anc-build'
+allprojects {
+    layout.buildDirectory.set(new File("$outDir/${project.name}"))
+}

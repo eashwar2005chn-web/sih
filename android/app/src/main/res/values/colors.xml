@@ -24,5 +24,10 @@
     <color name="warn">#FFD97706</color>
     <color name="danger">#FFDC2626</color>
 
+    <color name="danger_bg">#FFFEF2F2</color>
+    <color name="success_bg">#FFECFDF5</color>
+    <color name="warn_bg">#FFFFFBEB</color>
+    <color name="scrim">#14000000</color>
+
     <color name="ic_launcher_background">#FF2563EB</color>
 </resources>
