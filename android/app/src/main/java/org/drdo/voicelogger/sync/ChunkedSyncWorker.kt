@@ -28,7 +28,7 @@ class ChunkedSyncWorker(
     private val db = AppDatabase.getDatabase(context)
     private val chunkSize = 512 * 1024 // 512 KB per chunk
 
-    override async suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val unsyncedEntries = db.logbookEntryDao().getUnsyncedEntries()
         if (unsyncedEntries.isEmpty()) {
             return@withContext Result.success()
@@ -86,7 +86,7 @@ class ChunkedSyncWorker(
                         put("durationSec", entry.durationSec)
                         put("vadSpeechSec", entry.vadSpeechSec)
                         put("createdAt", entry.startedAt)
-                        put("snrGainDb", entry.snrGainDb)
+                        put("levelReductionDb", entry.levelReductionDb)
                     }
 
                     val serverResponse = sendChunkToServer(entry.id, payload)

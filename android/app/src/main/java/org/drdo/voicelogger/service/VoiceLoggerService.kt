@@ -47,6 +47,7 @@ class VoiceLoggerService : Service() {
         const val ACTION_START = "ACTION_START"
         const val ACTION_STOP = "ACTION_STOP"
         const val ACTION_TRIGGER_SOS = "ACTION_TRIGGER_SOS"
+        const val ACTION_STAND_DOWN_SOS = "ACTION_STAND_DOWN_SOS"
 
         @Volatile
         var isServiceRunning = false
@@ -73,7 +74,7 @@ class VoiceLoggerService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        db = AppDatabase.getInstance(applicationContext)
+        db = AppDatabase.getDatabase(applicationContext)
         onnxProcessor = OnnxAncProcessor(applicationContext)
         keywordSpotter = KeywordSpotter(applicationContext)
 
@@ -89,7 +90,7 @@ class VoiceLoggerService : Service() {
                         details = "Duress Code Word '$codeWord' detected by engine ONNX_KWS_v1.0 (Real Score: $confidence)",
                         sha256 = ""
                     )
-                    db.auditLogDao().insertLog(audit)
+                    db.auditLogDao().insertAuditLog(audit)
                 }
             }
         })
@@ -116,6 +117,12 @@ class VoiceLoggerService : Service() {
             ACTION_TRIGGER_SOS -> {
                 handleSosTrigger()
             }
+            ACTION_STAND_DOWN_SOS -> {
+                // Clears the SOS flag only. Recording is deliberately untouched: standing
+                // down an emergency must never interrupt capture.
+                isSosActive = false
+                updateNotification("Recording — 24/7 logbook active")
+            }
         }
         return START_STICKY
     }
@@ -130,7 +137,7 @@ class VoiceLoggerService : Service() {
                 details = "Emergency SOS Alert triggered by operator. Recording continues unbroken.",
                 sha256 = ""
             )
-            db.auditLogDao().insertLog(audit)
+            db.auditLogDao().insertAuditLog(audit)
         }
         updateNotification("🚨 SOS ALERT ACTIVE — Continuous Recording")
     }
